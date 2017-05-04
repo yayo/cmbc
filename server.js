@@ -22,6 +22,12 @@ app.get
  );
 
 app.get
+ ('/const.js',function(req,res)
+  {res.end("var platformId=\""+config.credentials.my.platformId+"\";");
+  }
+ );
+
+app.get
  ('/cmbc.js',function(req,res)
   {res.sendFile(__dirname +"/html/"+"cmbc.js");
   }
