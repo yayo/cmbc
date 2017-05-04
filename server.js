@@ -16,6 +16,18 @@ app.get
  );
 
 app.get
+ ('/cmbc.css',function(req,res)
+  {res.sendFile(__dirname +"/html/"+"cmbc.css");
+  }
+ );
+
+app.get
+ ('/cmbc.js',function(req,res)
+  {res.sendFile(__dirname +"/html/"+"cmbc.js");
+  }
+ );
+
+app.get
  ('/index.html',function(req,res)
   {res.sendFile(__dirname +"/html/"+"index.html");
   }
@@ -33,7 +45,7 @@ app.get
   }
  );
 
-function post(req,res)
+function post(req,res,action)
  {console.log(req.connection.remoteAddress+":"+req.connection.remotePort);
   console.log(req.body);
   var v1=JSON.stringify(req.body);
@@ -41,7 +53,7 @@ function post(req,res)
   var v3=java.callStaticMethodSync("com.yayooo.cmbc.cipher","encrypt",config.credentials.cmbc,JSON.stringify({"sign":v2,"body":v1}));
   var server="wxpay.cmbc.com.cn";
   request.post
-   ({"url":"http://"+server+"/mobilePlatform/lcbpService/mchntAdd.do","headers":{"Content-Type":"application/json"},"body":JSON.stringify({"businessContext":v3,"merchantNo":"","merchantSeq":"","reserve1":"","reserve2":"","reserve3":"","reserve4":"","reserve5":"","reserveJson":"","securityType":"","sessionId":"","source":"","transCode":"","transDate":"","transTime":"","version":""})},
+   ({"url":"http://"+server+"/mobilePlatform/lcbpService/"+action+".do","headers":{"Content-Type":"application/json"},"body":JSON.stringify({"businessContext":v3,"merchantNo":"","merchantSeq":"","reserve1":"","reserve2":"","reserve3":"","reserve4":"","reserve5":"","reserveJson":"","securityType":"","sessionId":"","source":"","transCode":"","transDate":"","transTime":"","version":""})},
     function(err,cmbc,v4)
      {if(err)
        {res.end(JSON.stringify(err));
@@ -87,8 +99,8 @@ function post(req,res)
    );
  }
 
-app.post('/mchntAdd.html',jsonParser,function(req,res){post(req,res);});
-app.post('/queryMchnt.html',jsonParser,function(req,res){post(req,res);});
+app.post('/mchntAdd.html',jsonParser,function(req,res){post(req,res,"mchntAdd");});
+app.post('/queryMchnt.html',jsonParser,function(req,res){post(req,res,"queryMchnt");});
 
 var server=app.listen
  (config.server.listen.port,function()

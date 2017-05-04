@@ -1,0 +1,12 @@
+table,input
+ {width: 98%;
+ }
+table td:nth-child(1)
+ {width: 11%;
+ }
+table td:nth-child(4)
+ {width: 40%;
+ }
+textarea
+ {width: 99%;
+ }
