@@ -30,7 +30,7 @@ function o2t(o)
     v.appendChild(document.createTextNode(i));
     r.appendChild(v);
     v=document.createElement("td");
-    v.appendChild(document.createTextNode(o[i]));
+    v.innerHTML=o[i];
     r.appendChild(v);
    }
   t.border="true";
