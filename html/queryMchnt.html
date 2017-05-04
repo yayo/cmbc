@@ -1,0 +1,66 @@
+<html>
+<head>
+<style>
+table,input
+ {width: 98%;
+ }
+table td:nth-child(1)
+ {width: 11%;
+ }
+table td:nth-child(4)
+ {width: 40%;
+ }
+textarea
+ {width: 99%;
+ }
+</style>
+<script>
+function f2o(f)
+ {var r={};
+  for (var i=0;i<f.length;i++)
+   {if(""!==f[i]['name']){r[f[i]['name']]=f[i]['value'];}
+   }
+  return r;
+ }
+function post(f)
+ {var b=document.getElementById("b");
+  var t=document.getElementById("t");
+  b.disabled=true;
+  var b0=b.value;
+  b.value="Processing";
+  var http = new XMLHttpRequest();
+  http.open("POST",window.location,true);
+  http.setRequestHeader("Content-type","application/json");
+  http.onreadystatechange=function()
+   {if(http.readyState===4)
+     {if(http.status===200)
+       {t.value=http.responseText;
+        b.value=b0;
+        b.disabled=false;
+       }
+      else
+       {alert(http.statusText);
+       }
+     }
+   };
+  http.send(JSON.stringify(f2o(f)));
+  return(false);
+ }
+</script>
+</head>
+<body>
+<form id="f" onsubmit="return post(this)">
+<table border=1 >
+<tr><td rowspan=3>公共部分</td></tr>
+<tr><td>流水号</td><td><input type="text" name="txnSeq" maxlength=32 value="100860001111111000"></td><td>*</td><td>调用方生成，确保唯一</td></tr>
+<tr><td>平台号</td><td><input type="text" name="platformId" maxlength=21 value="A00002016090000000125"></td><td>*</td><td>民生银行生成</td></tr>
+<tr><td rowspan=3>查询条件</td></tr>
+<tr><td>外部商户号</td><td><input type="text" name="outMchntId" maxlength=64 value="O01002016070000000635"></td><td>*</td><td>要与商户基础信息注册时参数一致</td></tr>
+<tr><td>民生商户号</td><td><input type="text" name="cmbcMchntId" maxlength=21 value=""></td><td>*</td><td>要与商户基础信息注册时参数一致</td></tr>
+<tr><td colspan=5 align="center" ><input type="submit" value="Submit" id="b"></td></tr>
+<tr><td colspan=5 align="center"><textarea disabled readonly id="t">"*"号标记为必填字段</textarea></td></tr>
+</table>
+</form>
+</body>
+</html>
+

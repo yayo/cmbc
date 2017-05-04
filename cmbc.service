@@ -1,0 +1,12 @@
+[Unit]
+Description=China Minsheng Banking Corporation
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/bash -c '/usr/bin/node /var/cmbc/server.js >> /tmp/cmbc.log 2>> /tmp/cmbc.err &'
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
