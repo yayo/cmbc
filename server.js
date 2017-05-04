@@ -6,8 +6,8 @@ var request = require('request');
 var java = require("java");
 
 var app = express();
-var jsonParser = bodyParser.json({ extended: false })
-java.classpath.push(config.jars.sadk);
+var jsonParser = bodyParser.json({extended: false})
+java.classpath.push(__dirname+"/SADK-CMBC-3.1.0.8.jar");
  
 app.get
  ('/',function(req,res)
@@ -17,7 +17,7 @@ app.get
 
 app.get
  ('/cmbc.css',function(req,res)
-  {res.sendFile(__dirname +"/html/"+"cmbc.css");
+  {res.sendFile(__dirname+"/html/"+"cmbc.css");
   }
  );
 
@@ -29,25 +29,25 @@ app.get
 
 app.get
  ('/cmbc.js',function(req,res)
-  {res.sendFile(__dirname +"/html/"+"cmbc.js");
+  {res.sendFile(__dirname+"/html/"+"cmbc.js");
   }
  );
 
 app.get
  ('/index.html',function(req,res)
-  {res.sendFile(__dirname +"/html/"+"index.html");
+  {res.sendFile(__dirname+"/html/"+"index.html");
   }
  );
 
 app.get
  ('/mchntAdd.html',function(req,res)
-  {res.sendFile( __dirname + "/html/" + "mchntAdd.html" );
+  {res.sendFile( __dirname+ "/html/" + "mchntAdd.html" );
   }
  );
 
 app.get
  ('/queryMchnt.html',function(req,res)
-  {res.sendFile( __dirname + "/html/" + "queryMchnt.html" );
+  {res.sendFile( __dirname+ "/html/" + "queryMchnt.html" );
   }
  );
 
@@ -73,22 +73,22 @@ function Colorful(o)
 function post(req,res,action,process)
  {console.log(req.connection.remoteAddress+":"+req.connection.remotePort);
   console.log(req.body);
-  if(!req.body.hasOwnProperty("txnSeq")||""===req.body.txnSeq)
-   {res.end(JSON.stringify({"Error":"0==size(txnSeq)"}));
+  if(!req.body.hasOwnProperty("txnSeq")||!req.body.hasOwnProperty("platformId")||""===req.body.txnSeq||req.body.platformId!==config.credentials.my.platformId)
+   {res.end(JSON.stringify({"Error":"txnSeq||platformId"}));
    }
   else
    {var body=JSON.stringify(req.body);
     var signature=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,body);
     var upload=java.callStaticMethodSync("com.yayooo.cmbc.cipher","encrypt",config.credentials.cmbc,JSON.stringify({"sign":signature,"body":body}));
-    var server="wxpay.cmbc.com.cn";
+    var url=config.server.cmbc+action+".do";
     request.post
-     ({"url":"http://"+server+"/mobilePlatform/lcbpService/"+action+".do","headers":{"Content-Type":"application/json"},"body":JSON.stringify({"businessContext":upload,"merchantNo":"","merchantSeq":"","reserve1":"","reserve2":"","reserve3":"","reserve4":"","reserve5":"","reserveJson":"","securityType":"","sessionId":"","source":"","transCode":"","transDate":"","transTime":"","version":""})},
+     ({"url":url,"headers":{"Content-Type":"application/json"},"body":JSON.stringify({"businessContext":upload,"merchantNo":"","merchantSeq":"","reserve1":"","reserve2":"","reserve3":"","reserve4":"","reserve5":"","reserveJson":"","securityType":"","sessionId":"","source":"","transCode":"","transDate":"","transTime":"","version":""})},
       function(err,cmbc,download)
        {if(err)
          {res.end(JSON.stringify(err));
          }
         else if(cmbc.statusCode!=200)
-         {res.end(JSON.stringify({"server":"wxpay.cmbc.com.cn","statusCode":cmbc.statusCode}));
+         {res.end(JSON.stringify({"url":url,"statusCode":cmbc.statusCode}));
          }
         else
          {console.log(download);
@@ -110,11 +110,12 @@ function post(req,res,action,process)
                  }
                 else
                  {o=JSON.parse(o.body);
-                  if(!o.hasOwnProperty("txnSeq")||req.body.txnSeq!==o.txnSeq)
-                   {res.end(JSON.stringify({"Error":"txnSeq"}));
+                  if(!o.hasOwnProperty("txnSeq")||!o.hasOwnProperty("platformId")||o.txnSeq!==req.body.txnSeq||o.platformId!==config.credentials.my.platformId)
+                   {res.end(JSON.stringify({"Error":"platformId||txnSeq"}));
                    }
                   else
-                   {Colorful(o);
+                   {delete(o.platformId);
+                    Colorful(o);
                     process(o);
                    }
                  }
