@@ -4,8 +4,12 @@ nodejs
 npm
 npm install express
 npm install body-parser
+npm install formidable
 npm install request
 npm install java
+npm install md5
+npm install sqlite3
+
 javac -cp SADK-CMBC-3.1.0.8.jar -d node_modules/java/src-java cipher.java
 
 cp config.example.js config.js

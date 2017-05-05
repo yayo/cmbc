@@ -5,14 +5,14 @@
 <script type="text/javascript" src="cmbc.js"></script>
 </head>
 <body>
-<form name="f" onsubmit="return post(this)">
+<form name="f" onsubmit="return post()">
 <table id="t" border=1 >
 <tr><td rowspan=3>公共部分</td></tr>
 <tr><td></td><td><input type="text" name="txnSeq" maxlength=32 disabled readonly value=""></td><td>*</td><td>调用方生成，确保唯一</td></tr>
 <tr><td></td><td><input type="text" name="platformId" maxlength=21 disabled readonly value=""></td><td>*</td><td>民生银行生成</td></tr>
 <tr><td rowspan=3>查询条件</td></tr>
-<tr><td></td><td><input type="text" name="outMchntId" maxlength=64 value="O20170504174222"></td><td>*</td><td>要与商户基础信息注册时参数一致</td></tr>
-<tr><td></td><td><input type="text" name="cmbcMchntId" maxlength=21 value="M29002017050000020265"></td><td>*</td><td>要与商户基础信息注册时参数一致</td></tr>
+<tr><td></td><td><input type="text" onblur="out2cmbc(this)" name="outMchntId" maxlength=64 value="O20170504174229"></td><td>*</td><td>要与商户基础信息注册时参数一致</td></tr>
+<tr><td></td><td><input type="text" id="cmbcMchntId" name="cmbcMchntId" maxlength=21 value=""></td><td>*</td><td>要与商户基础信息注册时参数一致</td></tr>
 <tr><td colspan=5 align="center" ><input type="submit" value="Submit" id="b"></td></tr>
 <tr><td colspan=5 align="center"><ol id="o">"*"号标记为必填字段</ol></td></tr>
 </table>
