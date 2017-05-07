@@ -256,9 +256,7 @@ app.post
     form.parse
      (req,
       function(err,fields,files)
-       {
-        //console.log(fields);
-        if(undefined===fields["uploadContext"])
+       {if(undefined===fields["uploadContext"])
          {
          }
         else
@@ -289,16 +287,13 @@ app.post
                    {
                    }
                   else
-                   {
-                    p["edType"]=fields["edType"];
+                   {p["edType"]=fields["edType"];
                     p["upFileCount"]=""+upFileCount;
                     p["md5s"]=md5s;
                     //console.log(JSON.stringify(p));
                     var u=encode(res,p);
                     if(undefined!==u)
-                     {
-                      //console.log(JSON.stringify(u));
-                      var form={"uploadContext":JSON.stringify(u)};
+                     {var form={"uploadContext":JSON.stringify(u)};
                       var d={};
                       var f;
                       for(f in files)
@@ -333,8 +328,7 @@ app.post
                                  }
                                 else
                                  {d[h]=files[f];
-                                  console.log(files[f].path);
-                                  form[f]={"options":{"filename":f+".jpg","contentType":"image/jpg"},"value":fs.createReadStream(files[f].path)};
+                                  form[f]={"options":{"filename":f+".jpg","contentType":"image/jpeg"},"value":fs.createReadStream(files[f].path)};
                                  }
                                }
                              }
@@ -343,11 +337,9 @@ app.post
                        }
                       var url=config.server.cmbc+"upload"+".do";
                       request.post
-                       (
-                        {"url":url,"formData":form},
+                       ({"url":url,"formData":form},
                         function(e,cmbc,download)
-                         {
-                          decode(p,res,e,cmbc,download,function(o){res.end(JSON.stringify(o));});
+                         {decode(p,res,e,cmbc,download,function(o){res.end(JSON.stringify(o));});
                          }
                        );
                      }

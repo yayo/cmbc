@@ -6,46 +6,54 @@
 <script type="text/javascript" src="cmbc.js"></script>
 <script type="text/javascript">
 
+function next(b0,ts,c)
+ {c.txnSeq=serial();
+  document.f.txnSeq.value=c.txnSeq;
+  var t=Object.keys(ts)[0];
+   {var form=new FormData();
+    form.append("uploadContext",JSON.stringify(c));
+    form.append("edType",t);
+    var l=submits[t];
+    var s={};
+    var m={};
+    for(i in l)
+     {var f=l[i];
+      var n=check_file_size_name(f);
+      if(""===n)
+       {return(false);
+       }
+      else
+       {s[n]=sizes[n];
+        m[n]=md5s[n];
+       }
+     }
+    form.append("sizes",JSON.stringify(s));
+    form.append("md5s",JSON.stringify(m));
+    for(i in l)
+     {var f=l[i];
+      var n=check_file_size_name(f);
+      form.append(n,f,n);
+     }
+    http_processing(form,"",b0,ts,t,next,c);
+   }
+ }
+
 function upload()
  {if(0==Object.keys(sizes).length||Object.keys(sizes).length!==Object.keys(md5s).length){alert("NOthing Selected!");return(false);}
   else
-   {var c=JSON.stringify(f2o());
-    var b0=http_start();
-    for(t in submits)
-     {var form=new FormData();
-      form.append("uploadContext",c);
-      form.append("edType",t);
-      var l=submits[t];
-      var s={};
-      var m={};
-      for(i in l)
-       {var f=l[i];
-        var n=check_file_size_name(f);
-        if(""===n)
-         {return(false);
-         }
-        else
-         {s[n]=sizes[n];
-          m[n]=md5s[n];
-         }
-       }
-      form.append("sizes",JSON.stringify(s));
-      form.append("md5s",JSON.stringify(m));
-      for(i in l)
-       {var f=l[i];
-        var n=check_file_size_name(f);
-        form.append(n,f,n);
-       }
-      http_processing(form,"",function(){},"");
-     }
-    http_end(b0);
+   {var b0=http_start();
+    document.getElementById("o").innerHTML="";
+    var c=f2o();
+    var ts=JSON.parse(JSON.stringify(submits));
+    //console.log(JSON.stringify(ts));
+    next(b0,ts,c);
     return(false);
    }
  }
 </script>
 </head>
 <body>
-<form name="f" onsubmit="return upload()">
+<form name="f" onsubmit="return(upload());">
 <table id="t" border=1 >
 <tr><td rowspan=4>公共部分</td></tr>
 <tr><td></td><td><input type="text" name="txnSeq" maxlength=32 disabled readonly value=""></td><td>*</td><td>调用方生成，确保唯一</td></tr>
