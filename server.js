@@ -2,13 +2,13 @@
 var config=require("./config");
 var express=require("express");
 var bodyParser=require("body-parser");
-var formidable=require('formidable')
+var formidable=require("formidable")
 var request=require("request");
-var FormData=require('form-data');
+var FormData=require("form-data");
 var java=require("java");
-var fs=require('fs');
-var md5=require('md5');
-var sqlite=require('sqlite3');
+var fs=require("fs");
+var md5=require("md5");
+var sqlite=require("sqlite3");
 
 var app=express();
 var jsonParser=bodyParser.json({extended: false})
@@ -101,8 +101,28 @@ app.get
   }
  );
 app.get
+ ('/mchntUpd.html',function(req,res)
+  {res.sendFile( __dirname+ "/html/" + "mchntUpd.html" );
+  }
+ );
+app.get
  ('/queryMchnt.html',function(req,res)
   {res.sendFile( __dirname+ "/html/" + "queryMchnt.html" );
+  }
+ );
+app.get
+ ('/chnlAdd.html',function(req,res)
+  {res.sendFile( __dirname+ "/html/" + "chnlAdd.html" );
+  }
+ );
+app.get
+ ('/chnlUpd.html',function(req,res)
+  {res.sendFile( __dirname+ "/html/" + "chnlUpd.html" );
+  }
+ );
+app.get
+ ('/queryChnl.html',function(req,res)
+  {res.sendFile( __dirname+ "/html/" + "queryChnl.html" );
   }
  );
 app.get
@@ -127,6 +147,9 @@ function Colorful(o)
     else
      {o.errorMsg="<b class=\"success\">"+o.errorMsg+"</b>";
      }
+   }
+  if(o.hasOwnProperty("cmbcSignId")&&""!==o.cmbcSignId)
+   {o.cmbcSignId="<b class=\"success\">"+o.cmbcSignId+"</b>";
    }
  }
 
@@ -163,7 +186,7 @@ function decode(p,res,err,cmbc,download,process)
    {res.end(JSON.stringify(err));
    }
   else if(cmbc.statusCode!=200)
-   {res.end(JSON.stringify({"url":url,"statusCode":cmbc.statusCode}));
+   {res.end(JSON.stringify({"Error":"statusCode:"+cmbc.statusCode}));
    }
   else
    {
@@ -214,6 +237,7 @@ function post(req,res,action,process)
   var body=encode(res,req.body);
   if(undefined!==body)
    {var url=config.server.cmbc+action+".do";
+   console.log(url);
     request.post
      ({"url":url,"headers":{"Content-Type":"application/json"},"body":JSON.stringify(body)},
       function(e,cmbc,download)
@@ -245,7 +269,11 @@ app.post
    }
  );
 
+app.post('/mchntUpd.html',jsonParser,function(req,res){post(req,res,"mchntUpd",function(o){res.end(JSON.stringify(o));});});
 app.post('/queryMchnt.html',jsonParser,function(req,res){post(req,res,"queryMchnt",function(o){res.end(JSON.stringify(o));});});
+app.post('/chnlAdd.html',jsonParser,function(req,res){post(req,res,"chnlAdd",function(o){res.end(JSON.stringify(o));});});
+app.post('/chnlUpd.html',jsonParser,function(req,res){post(req,res,"chnlUpd",function(o){res.end(JSON.stringify(o));});});
+app.post('/queryChnl.html',jsonParser,function(req,res){post(req,res,"queryChnl",function(o){res.end(JSON.stringify(o));});});
 
 app.post
  ('/upload.html',
