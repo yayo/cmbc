@@ -4,6 +4,7 @@ var express=require("express");
 var bodyParser=require("body-parser");
 var formidable=require('formidable')
 var request=require("request");
+var FormData=require('form-data');
 var java=require("java");
 var fs=require('fs');
 var md5=require('md5');
@@ -129,62 +130,94 @@ function Colorful(o)
    }
  }
 
+function encode(res,i)
+ {
+  if(!i.hasOwnProperty("txnSeq")||!i.hasOwnProperty("platformId")||""===i.txnSeq||i.platformId!==config.credentials.my.platformId)
+   {res.end(JSON.stringify({"Error":"txnSeq||platformId"}));
+    return(undefined);
+   }
+  else
+   {var o=JSON.stringify(i);
+    var s=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,o);
+    if(""===s)
+     {res.end(JSON.stringify({"Error":"SADK-CMBC::sign"}));
+      return(undefined);
+     }
+    else
+     {
+      o=java.callStaticMethodSync("com.yayooo.cmbc.cipher","encrypt",config.credentials.cmbc,JSON.stringify({"sign":s,"body":o}));
+      if(""===o)
+       {res.end(JSON.stringify({"Error":"SADK-CMBC::encrypt"}));
+        return(undefined);
+       }
+      else
+       {return({"businessContext":o,"merchantNo":"","merchantSeq":"","reserve1":"","reserve2":"","reserve3":"","reserve4":"","reserve5":"","reserveJson":"","securityType":"","sessionId":"","source":"","transCode":"","transDate":"","transTime":"","version":""});
+       }
+     }
+   }
+ }
+
+function decode(p,res,err,cmbc,download,process)
+ {
+  if(err)
+   {res.end(JSON.stringify(err));
+   }
+  else if(cmbc.statusCode!=200)
+   {res.end(JSON.stringify({"url":url,"statusCode":cmbc.statusCode}));
+   }
+  else
+   {
+    //console.log(download);
+    download=JSON.parse(download);
+    if(""===download.businessContext)
+     {res.end(JSON.stringify(download));
+     }
+    else
+     {err=java.callStaticMethodSync("com.yayooo.cmbc.cipher","decrypt",config.credentials.my.key.file,config.credentials.my.key.password,download.businessContext);
+      if(""===err)
+       {res.end(JSON.stringify({"Error":"decrypt"}));
+       }
+      else
+       {
+        try
+         {
+          var cmbc=JSON.parse(err);
+          err=java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.cmbc,cmbc.body,cmbc.sign);
+          if(true!==err)
+           {res.end(JSON.stringify({"Error":"verify"}));
+           }
+          else
+           {
+            cmbc=JSON.parse(cmbc.body);
+            if(!cmbc.hasOwnProperty("txnSeq")||!cmbc.hasOwnProperty("platformId")||!cmbc.hasOwnProperty("outMchntId")||cmbc.txnSeq!==p.txnSeq||cmbc.outMchntId!==p.outMchntId||cmbc.platformId!==config.credentials.my.platformId)
+             {res.end(JSON.stringify({"Error":"platformId||txnSeq"}));
+             }
+            else
+             {
+              delete(cmbc.platformId);
+              Colorful(cmbc);
+              process(cmbc);
+             }
+           }
+         }
+        catch(e)
+         {res.end(JSON.stringify({"Error":"JSON.parse","value":err}));
+         }
+       }
+     }
+   }
+ }
+
 function post(req,res,action,process)
  {console.log(req.connection.remoteAddress+":"+req.connection.remotePort);
   console.log(req.body);
-  if(!req.body.hasOwnProperty("txnSeq")||!req.body.hasOwnProperty("platformId")||""===req.body.txnSeq||req.body.platformId!==config.credentials.my.platformId)
-   {res.end(JSON.stringify({"Error":"txnSeq||platformId"}));
-   }
-  else
-   {var body=JSON.stringify(req.body);
-    var signature=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,body);
-    var upload=java.callStaticMethodSync("com.yayooo.cmbc.cipher","encrypt",config.credentials.cmbc,JSON.stringify({"sign":signature,"body":body}));
-    var url=config.server.cmbc+action+".do";
+  var body=encode(res,req.body);
+  if(undefined!==body)
+   {var url=config.server.cmbc+action+".do";
     request.post
-     ({"url":url,"headers":{"Content-Type":"application/json"},"body":JSON.stringify({"businessContext":upload,"merchantNo":"","merchantSeq":"","reserve1":"","reserve2":"","reserve3":"","reserve4":"","reserve5":"","reserveJson":"","securityType":"","sessionId":"","source":"","transCode":"","transDate":"","transTime":"","version":""})},
-      function(err,cmbc,download)
-       {if(err)
-         {res.end(JSON.stringify(err));
-         }
-        else if(cmbc.statusCode!=200)
-         {res.end(JSON.stringify({"url":url,"statusCode":cmbc.statusCode}));
-         }
-        else
-         {console.log(download);
-          download=JSON.parse(download);
-          if(""===download.businessContext)
-           {res.end(JSON.stringify(download));
-           }
-          else
-           {var result=java.callStaticMethodSync("com.yayooo.cmbc.cipher","decrypt",config.credentials.my.key.file,config.credentials.my.key.password,download.businessContext);
-            if(""===result)
-             {res.end(JSON.stringify({"Error":"decrypt"}));
-             }
-            else
-             {try
-               {var o=JSON.parse(result);
-                signature=java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.cmbc,o.body,o.sign);
-                if(true!==signature)
-                 {res.end(JSON.stringify({"Error":"verify"}));
-                 }
-                else
-                 {o=JSON.parse(o.body);
-                  if(!o.hasOwnProperty("txnSeq")||!o.hasOwnProperty("platformId")||!o.hasOwnProperty("outMchntId")||o.txnSeq!==req.body.txnSeq||o.outMchntId!==req.body.outMchntId||o.platformId!==config.credentials.my.platformId)
-                   {res.end(JSON.stringify({"Error":"platformId||txnSeq"}));
-                   }
-                  else
-                   {delete(o.platformId);
-                    Colorful(o);
-                    process(o);
-                   }
-                 }
-               }
-              catch(e)
-               {res.end(JSON.stringify({"Error":"JSON.parse","value":result}));
-               }
-             }
-           }
-         }
+     ({"url":url,"headers":{"Content-Type":"application/json"},"body":JSON.stringify(body)},
+      function(e,cmbc,download)
+       {decode(req.body,res,e,cmbc,download,process);
        }
      );
    }
@@ -217,35 +250,113 @@ app.post('/queryMchnt.html',jsonParser,function(req,res){post(req,res,"queryMchn
 app.post
  ('/upload.html',
   function(req,res)
-   {
-    var form=new formidable.IncomingForm({hash:true,multiples:true});
+   {var form=new formidable.IncomingForm({hash:true,multiples:true});
     form.hash=true;
     form.multiples=true;
     form.parse
      (req,
       function(err,fields,files)
        {
-        console.log(fields);
-        //console.log(files);
-        var s={};
-        var m={};
-        var d={};
-        var f;
-        for(f in files)
-         {console.log(f);
-          console.log(files[f].size);
-          console.log(files[f].path);
-          var h=md5(fs.readFileSync(files[f].path,{flag:'r'}));
-          if(d.hasOwnProperty(h)&&d[h].size===files[f].size)
-           {res.end("{\"Error\":\"Duplicate\",\"file1\":\""+d[h].name+"\",\"file2\":\""+files[f].name+"\"}");
+        //console.log(fields);
+        if(undefined===fields["uploadContext"])
+         {
+         }
+        else
+         {var p=JSON.parse(fields["uploadContext"]);
+          if(undefined===fields["edType"])
+           {
            }
           else
-           {d[h]=files[f];
-            s[f]=files[f].size;
-            m[f]=h;
+           {
+            if(undefined===fields["sizes"])
+             {
+             }
+            else
+             {var upFileCount=Object.keys(files).length;
+              var s=JSON.parse(fields["sizes"]);
+              if(Object.keys(s).length!==upFileCount)
+               {
+               }
+              else
+               {
+                if(undefined===fields["md5s"])
+                 {
+                 }
+                else
+                 {
+                  var md5s=JSON.parse(fields["md5s"]);
+                  if(Object.keys(md5s).length!==upFileCount)
+                   {
+                   }
+                  else
+                   {
+                    p["edType"]=fields["edType"];
+                    p["upFileCount"]=""+upFileCount;
+                    p["md5s"]=md5s;
+                    //console.log(JSON.stringify(p));
+                    var u=encode(res,p);
+                    if(undefined!==u)
+                     {
+                      //console.log(JSON.stringify(u));
+                      var form={"uploadContext":JSON.stringify(u)};
+                      var d={};
+                      var f;
+                      for(f in files)
+                       {
+                        if(!s.hasOwnProperty(f))
+                         {
+                          return;
+                         }
+                        else
+                         {if(files[f].size!==s[f])
+                           {
+                            return;
+                           }
+                          else
+                           {
+                            if(!md5s.hasOwnProperty(f))
+                             {
+                              return;
+                             }
+                            else
+                             {
+                              var h=md5(fs.readFileSync(files[f].path,{flag:'r'}));
+                              if(h!==md5s[f])
+                               {
+                                return;
+                               }
+                              else
+                               {
+                                if(d.hasOwnProperty(h)&&d[h].size===files[f].size)
+                                 {res.end("{\"Error\":\"Duplicate\",\"file1\":\""+d[h].name+"\",\"file2\":\""+files[f].name+"\"}");
+                                  return;
+                                 }
+                                else
+                                 {d[h]=files[f];
+                                  console.log(files[f].path);
+                                  form[f]={"options":{"filename":f+".jpg","contentType":"image/jpg"},"value":fs.createReadStream(files[f].path)};
+                                 }
+                               }
+                             }
+                           }
+                         }
+                       }
+                      var url=config.server.cmbc+"upload"+".do";
+                      request.post
+                       (
+                        {"url":url,"formData":form},
+                        function(e,cmbc,download)
+                         {
+                          decode(p,res,e,cmbc,download,function(o){res.end(JSON.stringify(o));});
+                         }
+                       );
+                     }
+                   }
+                 }
+               }
+             }
            }
          }
-        res.end("{\"Error\":\"O3K\"}");
        }
      );
    }
