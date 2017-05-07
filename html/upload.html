@@ -23,8 +23,15 @@ function next(b0,ts,c)
        {return(false);
        }
       else
-       {s[n]=sizes[n];
-        m[n]=md5s[n];
+       {
+        m[n]=md5s[f.name.substring(5)];
+        if(1!==check_file_md5(m[n]))
+         {alert("Duplicate_MD5: "+m);
+          return(false);
+         }
+        else
+         {s[n]=f.files[0].size;
+         }
        }
      }
     form.append("sizes",JSON.stringify(s));
@@ -32,14 +39,14 @@ function next(b0,ts,c)
     for(i in l)
      {var f=l[i];
       var n=check_file_size_name(f);
-      form.append(n,f,n);
+      form.append(n,f.files[0],n);
      }
     http_processing(form,"",b0,ts,t,next,c);
    }
  }
 
 function upload()
- {if(0==Object.keys(sizes).length||Object.keys(sizes).length!==Object.keys(md5s).length){alert("NOthing Selected!");return(false);}
+ {if(0===Object.keys(md5s).length){alert("NOthing Selected!");return(false);}
   else
    {var b0=http_start();
     document.getElementById("o").innerHTML="";

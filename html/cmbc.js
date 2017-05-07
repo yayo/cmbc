@@ -79,32 +79,6 @@ function out2cmbc(i)
    }
  }
 
-function check_file_size_name(f)
- {var n=f.name
-  if(5>n.length||".jpg"!==n.substring(n.length-4).toLowerCase())
-   {alert("NOT .jpg");
-    return("");
-   }
-  else
-   {n=n.substring(0,n.length-4);
-    var l=4;
-    var u=204800;
-    if(f.size<l)
-     {alert("size("+f.name+")="+f.size+"<"+l);
-      return("");
-     }
-    else
-     {if(f.size>u)
-       {alert("size("+f.name+")="+f.size+">"+u);
-        return("");
-       }
-      else
-       {return(n);
-       }
-     }
-   }
- }
-
 function foreach_input(i,f)
  {var t=document.f;
   for(var e=0;e<t.length;e++)
@@ -117,9 +91,50 @@ function foreach_input(i,f)
    }
  }
 
-var sizes={};
 var md5s={};
 var submits={};
+
+function check_file_size_name(n)
+ {var f=n.files[0];
+  var m=f.name;
+  if(5>m.length||".jpg"!==m.substring(m.length-4).toLowerCase())
+   {n.type="";
+    alert("NOT .jpg");
+    n.type="file";
+    return("");
+   }
+  else
+   {m=m.substring(0,m.length-4);
+    var l=4;
+    var u=204800;
+    if(f.size<l)
+     {n.type="";
+      alert("size("+f.name+")="+f.size+"<"+l);
+      n.type="file";
+      return("");
+     }
+    else
+     {if(f.size>u)
+       {n.type="";
+        alert("size("+f.name+")="+f.size+">"+u);
+        n.type="file";
+        return("");
+       }
+      else
+       {return(m);
+       }
+     }
+   }
+ }
+
+function check_file_md5(m)
+ {var n=0;
+  for(var i in md5s)
+   {if(m===md5s[i])
+     n++;
+   }
+  return(n);
+ }
 
 window.onload=function()
  {document.f.txnSeq.value=serial();
@@ -150,22 +165,31 @@ window.onload=function()
     function(n)
      {n.addEventListener
        ("change",
-        function() 
-         {var f=this.files[0];
-          var a=check_file_size_name(f);
-          if(""!==a)
+        function(n)
+         {n=n.target;
+          if(""!==check_file_size_name(n))
            {var m=new SparkMD5();
             var r=new FileReader();
             r.onload=function(s)
              {m.appendBinary(s.target.result);
-              md5s[a]=m.end();
+              if(2==s.target.readyState)
+               {m=m.end();
+                var e=n.name.substring(5);
+                if(0!==check_file_md5(m))
+                 {n.type="";
+                  alert("Duplicate_MD5: "+m);
+                  delete(md5s[e]);
+                  n.type="file";
+                 }
+                else
+                 {md5s[e]=m;
+                  var t=e.substring(0,2);
+                  if(undefined===submits[t]) submits[t]={};
+                  submits[t][e.substring(3)]=n;
+                 }
+               }
              }
-            r.readAsBinaryString(f);
-            sizes[a]=f.size;
-            var e=n.name;
-            var t=e.substring(5,7);
-            if(undefined===submits[t]) submits[t]={};
-            submits[t][e.substring(8,9)]=f;
+            r.readAsBinaryString(n.files[0]);
            }
          }
        );
