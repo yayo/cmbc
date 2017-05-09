@@ -62,62 +62,14 @@ function upload()
 <body>
 <form name="f" onsubmit="return(upload());">
 <table id="t" border=1 >
-<tr><td rowspan=4>公共部分</td></tr>
+<tr><td rowspan=2>公共部分</td></tr>
 <tr><td></td><td><input type="text" name="txnSeq" maxlength=32 disabled readonly value=""></td><td>*</td><td>调用方生成，确保唯一</td></tr>
 <tr><td></td><td><input type="text" name="platformId" maxlength=21 disabled readonly value=""></td><td>*</td><td>民生银行生成</td></tr>
 <tr><td></td><td><input type="text" name="operId" maxlength=20 value="10010A0001"></td><td>*</td><td></td></tr>
-<tr><td rowspan=4>商户信息</td></tr>
+<tr><td rowspan=2>商户信息</td></tr>
 <tr><td></td><td><input type="text" onblur="out2cmbc(this)" name="outMchntId" maxlength=64 value="O01002016070000000635"></td><td>*</td><td>商户自己生成，确保唯一</td></tr>
 <tr><td></td><td><input type="text" id="cmbcMchntId" name="cmbcMchntId" maxlength=21 value=""></td><td>*</td><td>要与注册时一致，否则返回失败</td></tr>
 <tr><td></td><td><input type="text" name="message" maxlength=0></td><td></td><td></td></tr>
-<tr><td rowspan=6>营业执照</td></tr>
-<tr><td></td><td><input type="file" name="file_01_1" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_01_2" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_01_3" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_01_4" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_01_5" maxlength=0></td><td></td><td></td></tr>
-<tr><td rowspan=6>业务申请表</td></tr>
-<tr><td></td><td><input type="file" name="file_02_1" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_02_2" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_02_3" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_02_4" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_02_5" maxlength=0></td><td></td><td></td></tr>
-<tr><td rowspan=6>其他</td></tr>
-<tr><td></td><td><input type="file" name="file_03_1" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_03_2" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_03_3" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_03_4" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_03_5" maxlength=0></td><td></td><td></td></tr>
-<tr><td rowspan=6>银行卡</td></tr>
-<tr><td></td><td><input type="file" name="file_04_1" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_04_2" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_04_3" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_04_4" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_04_5" maxlength=0></td><td></td><td></td></tr>
-<tr><td rowspan=6>其他</td></tr>
-<tr><td></td><td><input type="file" name="file_05_1" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_05_2" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_05_3" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_05_4" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_05_5" maxlength=0></td><td></td><td></td></tr>
-<tr><td rowspan=6>商户协议</td></tr>
-<tr><td></td><td><input type="file" name="file_06_1" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_06_2" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_06_3" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_06_4" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_06_5" maxlength=0></td><td></td><td></td></tr>
-<tr><td rowspan=6>店铺照片</td></tr>
-<tr><td></td><td><input type="file" name="file_07_1" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_07_2" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_07_3" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_07_4" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_07_5" maxlength=0></td><td></td><td></td></tr>
-<tr><td rowspan=6>法人/负责人身份证</td></tr>
-<tr><td></td><td><input type="file" name="file_08_1" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_08_2" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_08_3" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_08_4" maxlength=0></td><td></td><td></td></tr>
-<tr><td></td><td><input type="file" name="file_08_5" maxlength=0></td><td></td><td></td></tr>
 <tr><td colspan=5 align="center" ><input type="submit" value="Submit" id="b"></td></tr>
 <tr><td colspan=5 align="center"><ol id="o">"*"号标记为必填字段，至少选择1个文件</ol></td></tr>
 </table>

@@ -12,3 +12,6 @@ textarea
  }
 .success {color:blue;}
 .failed {color:red;}
+.mandatory {background-color:#FAAFB8}
+.option {background-color:#F0E68C}
+.oneintwo {background-color:#DEB887}
