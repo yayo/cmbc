@@ -4,7 +4,7 @@ table,input
 table td:nth-child(1)
  {width: 12%;
  }
-table td:nth-child(4)
+table td:nth-child(3)
  {width: 40%;
  }
 textarea

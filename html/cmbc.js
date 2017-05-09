@@ -203,8 +203,6 @@ function edType_file_append(i)
       v.appendChild(f);
       r.appendChild(v);
       v=document.createElement("td");
-      r.appendChild(v);
-      v=document.createElement("td");
       v.appendChild(document.createTextNode("文件长度需小于等于200KB"));
       r.appendChild(v);
       h.rowSpan++;
@@ -233,11 +231,11 @@ window.onload=function()
        {r.cells[0].innerText=c2n[n][0];
         if(0===c2n[n][1])
          {r.cells[1].firstChild.classList.add("option");
-          r.cells[2].innerText="";
+          //r.cells[2].innerText="";
          }
         else if(1===c2n[n][1])
          {r.cells[1].firstChild.classList.add("mandatory");
-          r.cells[2].innerText="*";
+          //r.cells[2].innerText="*";
          }
         else if(2===c2n[n][1])
          {r.cells[1].firstChild.classList.add("oneintwo");

@@ -8,30 +8,30 @@
 <form name="f" onsubmit="return(post());">
 <table id="t" border=1 >
 <tr><td rowspan=2>公共部分</td></tr>
-<tr><td></td><td><input type="text" name="txnSeq" maxlength=32 disabled readonly value=""></td><td></td><td>调用方生成，确保唯一</td></tr>
-<tr><td></td><td><input type="text" name="platformId" maxlength=21 disabled readonly value=""></td><td></td><td>民生银行生成</td></tr>
-<tr><td></td><td><input type="text" name="operId" maxlength=20 value="10010A0001"></td><td></td><td></td></tr>
+<tr><td></td><td><input type="text" name="txnSeq" maxlength=32 value=""></td><td>调用方生成，确保唯一</td></tr>
+<tr><td></td><td><input type="text" name="platformId" maxlength=21 value=""></td><td>民生银行生成</td></tr>
+<tr><td></td><td><input type="text" name="operId" maxlength=20 value="10010A0001"></td><td></td></tr>
 <tr><td rowspan=2>商户信息</td></tr>
-<tr><td></td><td><input type="text" onblur="out2cmbc(this)" name="outMchntId" maxlength=64 value="O01002016070000000635"></td><td></td><td>与商户基础信息注册时参数一致</td></tr>
-<tr><td></td><td><input type="text" id="cmbcMchntId" name="cmbcMchntId" maxlength=21 value=""></td><td></td><td>要与商户基础信息注册时参数一致</td></tr> 
-<tr><td></td><td><input type="text" name="apiCode" maxlength=4 value="0005"></td><td></td><td>0005：微信；0007：支付宝；0008：QQ钱包</td></tr>
-<tr><td></td><td><input type="text" name="industryId" maxlength=64 value="102"></td><td></td><td>数据字典，见demo文档</td></tr>
-<tr><td></td><td><input type="text" name="message" maxlength=200 value=""></td><td></td><td>通道其他信息，以json格式传入</td></tr>
-<tr><td></td><td><input type="text" name="operateType" maxlength=1 value="1"></td><td></td><td>1-间联，2-直联</td></tr>
-<tr><td></td><td><input type="text" name="dayLimit" maxlength=12 value="5000000"></td><td></td><td>单位：分</td></tr>
-<tr><td></td><td><input type="text" name="monthLimit" maxlength=12 value="6000000"></td><td></td><td>单位：分</td></tr>
-<tr><td></td><td><input type="text" name="fixFeeRate" maxlength=100 value="0.38"></td><td rowspan=2>二选一</td><td>0.50%：0.50小数点后精确到2位</td></tr>
+<tr><td></td><td><input type="text" onblur="out2cmbc(this)" name="outMchntId" maxlength=64 value="O01002016070000000635"></td><td>与商户基础信息注册时参数一致</td></tr>
+<tr><td></td><td><input type="text" id="cmbcMchntId" name="cmbcMchntId" maxlength=21 value=""></td><td>要与商户基础信息注册时参数一致</td></tr> 
+<tr><td></td><td><input type="text" name="apiCode" maxlength=4 value="0005"></td><td>0005：微信；0007：支付宝；0008：QQ钱包</td></tr>
+<tr><td></td><td><input type="text" name="industryId" maxlength=64 value="102"></td><td>数据字典，见demo文档</td></tr>
+<tr><td></td><td><input type="text" name="message" maxlength=200 value=""></td><td>通道其他信息，以json格式传入</td></tr>
+<tr><td></td><td><input type="text" name="operateType" maxlength=1 value="1"></td><td>1-间联，2-直联</td></tr>
+<tr><td></td><td><input type="text" name="dayLimit" maxlength=12 value="5000000"></td><td>单位：分</td></tr>
+<tr><td></td><td><input type="text" name="monthLimit" maxlength=12 value="6000000"></td><td>单位：分</td></tr>
+<tr><td></td><td><input type="text" name="fixFeeRate" maxlength=100 value="0.38"></td><td>0.50%：0.50小数点后精确到2位</td></tr>
 <tr><td></td><td><input type="text" name="specFeeRate" maxlength=100 value=""></td><td>具体说明请见表后</td></tr>
-<tr><td></td><td><input type="text" name="account" maxlength=32 value="6221234567890000"></td><td></td><td></td></tr>
-<tr><td></td><td><input type="text" name="pbcBankId" maxlength=12 value="103758317245"></td><td></td><td>大小额行号，非民生账户必填</td></tr>
-<tr><td></td><td><input type="text" name="acctName" maxlength=200 value="唐三藏"></td><td></td><td></td></tr>
-<tr><td></td><td><input type="text" name="acctType" maxlength=1 value="1"></td><td></td><td>1-对私，2-对公</td></tr>
-<tr><td></td><td><select name="idType" maxlength=2><option value="01">身份证</option><option value="02">军官证</option><option value="03">护照</option><option value="04">回乡证</option><option value="05">台胞证</option><option value="06">警官证</option><option value="07">士兵证</option><option value="99">其它证件</option></select></td><td></td><td></td></tr>
-<tr><td></td><td><input type="text" name="idCode" maxlength=60 value=""></td><td></td><td></td></tr>
-<tr><td></td><td><input type="text" name="acctTelePhone" maxlength=20 value=""></td><td></td><td></td></tr>
-<tr><td colspan=5 align="center" ><input type="submit" value="Submit" id="b"></td></tr>
-<tr><td colspan=5 align="center">固定比例费率，填除去%之后的值，例如：0.35%，则填 0.35<br>特殊费率，则按[A]+[B]+[C]格式填写，说明如下：<br>A:保底金额；B:比例；C:比例起算金额<br>例一：0.35%，则填写规则为[0]+[0.35]+[0]<br>例二：1000 以下 2 元，超过 1000，2+（超过部分*0.2%），则填写规则为[2]+[0.2]+[1000]<br>例三：2+（消费金额*0.2%），则填写规则为[2]+[0.2]+[0]<br></td></tr>
-<tr><td colspan=5 align="center"><ol id="o">"*"号标记为必填字段</ol></td></tr>
+<tr><td></td><td><input type="text" name="account" maxlength=32 value="6221234567890000"></td><td></td></tr>
+<tr><td></td><td><input type="text" name="pbcBankId" maxlength=12 value="103758317245"></td><td>大小额行号，非民生账户必填</td></tr>
+<tr><td></td><td><input type="text" name="acctName" maxlength=200 value="唐三藏"></td><td></td></tr>
+<tr><td></td><td><input type="text" name="acctType" maxlength=1 value="1"></td><td>1-对私，2-对公</td></tr>
+<tr><td></td><td><select name="idType" maxlength=2><option value="01">身份证</option><option value="02">军官证</option><option value="03">护照</option><option value="04">回乡证</option><option value="05">台胞证</option><option value="06">警官证</option><option value="07">士兵证</option><option value="99">其它证件</option></select></td><td></td></tr>
+<tr><td></td><td><input type="text" name="idCode" maxlength=60 value=""></td><td></td></tr>
+<tr><td></td><td><input type="text" name="acctTelePhone" maxlength=20 value=""></td><td></td></tr>
+<tr><td colspan=4 align="center" ><input type="submit" value="Submit" id="b"></td></tr>
+<tr><td colspan=4 align="center">固定比例费率，填除去%之后的值，例如：0.35%，则填 0.35<br>特殊费率，则按[A]+[B]+[C]格式填写，说明如下：<br>A:保底金额；B:比例；C:比例起算金额<br>例一：0.35%，则填写规则为[0]+[0.35]+[0]<br>例二：1000 以下 2 元，超过 1000，2+（超过部分*0.2%），则填写规则为[2]+[0.2]+[1000]<br>例三：2+（消费金额*0.2%），则填写规则为[2]+[0.2]+[0]<br></td></tr>
+<tr><td colspan=4 align="center"><ol id="o">"*"号标记为必填字段</ol></td></tr>
 </table>
 </form>
 </body>
