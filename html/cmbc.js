@@ -1,4 +1,14 @@
 
+var cmbc_interface=
+ {"mchntAdd":"基础信息注册",
+  "mchntUpd":"基础信息修改",
+  "chnlAdd":"支付通道绑定",
+  "chnlUpd":"支付通道信息修改",
+  "queryMchnt":"基础信息查询",
+  "queryChnl":"支付通道信息查询",
+  "upload":"电子资料信息上传",
+ }
+
 var edType=
  {"01":["营业执照",1],
   "08":["法人/负责人身份证",2],
@@ -11,56 +21,56 @@ var edType=
  }
 
 var c2n=
- {/*code: name | mandatory | disabled | readonly | display */
-  "txnSeq":["流水号",1,1,1,1],
-  "platformId":["平台号",1,1,1,1],
-  "operId":["拓展人员编号",1,0,0,1],
-  "dataSrc":["进件渠道",1,1,1,1],
-  "outMchntId":["外部商户号",1,0,0,1],
-  "cmbcMchntId":["民生商户号",1,0,0,1],
-  "mchntName":["商户简称",1,0,0,1],
-  "mchntFullName":["公司全称",1,0,0,1],
+ {/*code: name | mandatory | disabled | readonly | hidden */
+  "txnSeq":["流水号",1,1,1,0],
+  "platformId":["平台号",1,1,1,0],
+  "operId":["拓展人员编号",1,0,0,0],
+  "dataSrc":["进件渠道",1,1,1,0],
+  "outMchntId":["外部商户号",1,0,0,0],
+  "cmbcMchntId":["民生商户号",1,0,0,0],
+  "mchntName":["商户简称",1,0,0,0],
+  "mchntFullName":["公司全称",1,0,0,0],
   "parentMchntId":["父商户",0,0,0,0],
-  "devType":["拓展模式",1,0,0,1],
-  "acdCode":["区域代码",1,0,0,1],
-  "province":["省份",1,0,0,1],
-  "city":["城市",1,0,0,1],
-  "address":["地址",1,0,0,1],
-  "isCert":["是否持证",1,0,0,1],
-  "licId":["营业执照号",1,0,0,1],
-  "licValidity":["营业执照有效期",1,0,0,1],
-  "corpName":["法人/联系人",1,0,0,1],
-  "idtCard":["法人/联系人证件号",1,0,0,1],
-  "contactName":["负责人",1,0,0,1],
-  "telephone":["负责人手机号",1,0,0,1],
-  "servTel":["客服电话",1,0,0,1],
+  "devType":["拓展模式",1,0,0,0],
+  "acdCode":["区域代码",1,0,0,0],
+  "province":["省份",1,0,0,0],
+  "city":["城市",1,0,0,0],
+  "address":["地址",1,0,0,0],
+  "isCert":["是否持证",1,0,0,0],
+  "licId":["营业执照号",1,0,0,0],
+  "licValidity":["营业执照有效期",1,0,0,0],
+  "corpName":["法人/联系人",1,0,0,0],
+  "idtCard":["法人/联系人证件号",1,0,0,0],
+  "contactName":["负责人",1,0,0,0],
+  "telephone":["负责人手机号",1,0,0,0],
+  "servTel":["客服电话",1,0,0,0],
   "identification":["客户识别码",0,0,0,0],
-  "autoSettle":["结算方式",1,0,0,1],
-  "industryId":["商户类别",1,0,0,1],
-  "operateType":["接入类型",1,0,0,1],
-  "dayLimit":["日限额",1,0,0,1],
-  "monthLimit":["月限额",1,0,0,1],
-  "fixFeeRate":["固定比例费率",2,0,0,1],
+  "autoSettle":["结算方式",1,0,0,0],
+  "industryId":["商户类别",1,0,0,0],
+  "operateType":["接入类型",1,0,0,0],
+  "dayLimit":["日限额",1,0,0,0],
+  "monthLimit":["月限额",1,0,0,0],
+  "fixFeeRate":["固定比例费率",2,0,0,0],
   "specFeeRate":["特殊费率",2,0,0,0],
-  "account":["结算账号",1,0,0,1],
-  "pbcBankId":["开户行号",0,0,0,1],
-  "acctName":["开户人",1,0,0,1],
-  "acctType":["账户类型",1,0,0,1],
+  "account":["结算账号",1,0,0,0],
+  "pbcBankId":["开户行号",0,0,0,0],
+  "acctName":["开户人",1,0,0,0],
+  "acctType":["账户类型",1,0,0,0],
   "idType":["开户人证件类型",0,0,0,0],
   "idCode":["证件号码",0,0,0,0],
   "acctTelePhone":["开户人预留手机号",0,0,0,0],
-  "edType":["资料分类",1,0,0,1],
-  "upFileCount":["本次上传文件数 ",1,0,0,1],
-  "md5s":["资料MD5",1,0,0,1],
-  "remark":["备注",0,0,0,1],
+  "edType":["资料分类",1,0,0,0],
+  "upFileCount":["本次上传文件数 ",1,0,0,0],
+  "md5s":["资料MD5",1,0,0,0],
+  "remark":["备注",0,0,0,0],
   "message":["备用字段",0,0,0,0],
-  "service":["接口类型",1,0,0,1],
-  "status":["商户状态",1,0,0,1],
-  "cmbcSignId":["民生签约编号",1,0,0,1],
-  "apiCode":["支付通道",1,0,0,1],
-  "respCode":["返回码",1,0,0,1],
-  "errorMsg":["错误信息",1,0,0,1],
-  "refuseMsg":["拒绝原因",0,0,0,1],
+  "service":["接口类型",1,0,0,0],
+  "status":["商户状态",1,0,0,0],
+  "cmbcSignId":["民生签约编号",1,0,0,0],
+  "apiCode":["支付通道",1,0,0,0],
+  "respCode":["返回码",1,0,0,0],
+  "errorMsg":["错误信息",1,0,0,0],
+  "refuseMsg":["拒绝原因",0,0,0,0],
  };
 
 function serial()
@@ -71,18 +81,15 @@ function serial()
  }
 
 function out2cmbc(i)
- {if(""===i)
-   {var params=(new URL(document.location)).searchParams;
-    var i=params.get("outMchntId");
-    if(null!==i)
-     {document.getElementsByName("outMchntId")[0].value=i;
-     }
+ {if(""===i.value)
+   {var p=(new URL(document.location)).searchParams;
+    i.value=p.get("outMchntId");
    }
-  if(""!==i)
-   {var o=document.getElementById("cmbcMchntId");
+  if(""!==i.value)
+   {var o=document.getElementsByName("cmbcMchntId")[0];
     if(null!==o&&""==o.value)
      {var http=new XMLHttpRequest();
-      http.open("GET","/out2cmbc?out="+i,true);
+      http.open("GET","/out2cmbc?out="+i.value,true);
       http.onreadystatechange=function()
        {if(4===http.readyState)
          {if(200!==http.status)
@@ -222,7 +229,11 @@ window.onload=function()
   document.f.platformId.value=platformId;
   var r1=[[undefined,1],[undefined,1]];
   var t=document.getElementById("t");
-  var i,r;
+  var i=window.location.pathname.substring(1);
+  i=cmbc_interface[i.substring(0,i.length-5)];
+  document.title=i;
+  t.rows[0].cells[0].innerText=i;
+  var r;
   for(i=0;r=t.rows[i];i++)
    {if(undefined===r.cells[1])
      {if(1!=r.cells[0].rowSpan)
@@ -250,7 +261,7 @@ window.onload=function()
          }
         r.cells[1].firstChild.disabled=(0!==c2n[n][2]);
         r.cells[1].firstChild.readOnly=(0!==c2n[n][3]);
-        if(0===c2n[n][4])
+        if(0!==c2n[n][4])
          {r.style.display="none";
          }
         else
@@ -288,7 +299,7 @@ window.onload=function()
   foreach_input
    (function(n)
      {if("outMchntId"===n.name)
-       {out2cmbc(n.value);
+       {out2cmbc(n);
        }
      },
     function(n)

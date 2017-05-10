@@ -62,16 +62,17 @@ function upload()
 <body>
 <form name="f" onsubmit="return(upload());">
 <table id="t" border=1 >
+<tr><th colspan=4 align="center" ></th></tr>
 <tr><td rowspan=2>公共部分</td></tr>
 <tr><td></td><td><input type="text" name="txnSeq" maxlength=32 value=""></td><td>调用方生成，确保唯一</td></tr>
 <tr><td></td><td><input type="text" name="platformId" maxlength=21 value=""></td><td>民生银行生成</td></tr>
-<tr><td></td><td><input type="text" name="operId" maxlength=20 value="10010A0001"></td><td></td></tr>
+<tr><td></td><td><input type="text" name="operId" maxlength=20 value=""></td><td></td></tr>
 <tr><td rowspan=2>商户信息</td></tr>
 <tr><td></td><td><input type="text" onblur="out2cmbc(this)" name="outMchntId" maxlength=64 value=""></td><td>商户自己生成，确保唯一</td></tr>
-<tr><td></td><td><input type="text" id="cmbcMchntId" name="cmbcMchntId" maxlength=21 value=""></td><td>要与注册时一致，否则返回失败</td></tr>
+<tr><td></td><td><input type="text" name="cmbcMchntId" maxlength=21 value=""></td><td>要与注册时一致，否则返回失败</td></tr>
 <tr><td></td><td><input type="text" name="message" maxlength=0></td><td></td></tr>
-<tr><td colspan=4 align="center" ><input type="submit" value="Submit" id="b"></td></tr>
-<tr><td colspan=4 align="center"><ol id="o">"*"号标记为必填字段，至少选择1个文件</ol></td></tr>
+<tr><td colspan=4 align="center" ><input id="b" type="submit" value="Submit"></td></tr>
+<tr><td colspan=4 align="center"><ol id="o"><b class="mandatory">必</b>填字段；<b class="option">选</b>填字段</ol></td></tr>
 </table>
 </form>
 </body>

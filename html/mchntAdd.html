@@ -7,35 +7,36 @@
 <body>
 <form name="f" onsubmit="return(post());">
 <table id="t" border=1 >
+<tr><th colspan=4 align="center" ></th></tr>
 <tr><td rowspan=2>公共部分</td></tr>
 <tr><td></td><td><input type="text" name="txnSeq" maxlength=32 value=""></td><td>调用方生成，确保唯一</td></tr>
 <tr><td></td><td><input type="text" name="platformId" maxlength=21 value=""></td><td>民生银行生成</td></tr>
-<tr><td></td><td><input type="text" name="operId" maxlength=20 value="10010A0001"></td><td></td></tr>
+<tr><td></td><td><input type="text" name="operId" maxlength=20 value=""></td><td></td></tr>
 <tr><td></td><td><input type="text" name="dataSrc" maxlength=1 value=2></td><td>填固定值 2</td></tr>
 <tr><td rowspan=2>商户信息</td></tr>
 <tr><td></td><td><input type="text" name="outMchntId" maxlength=64 value=""></td><td>商户自己生成，确保唯一</td></tr>
-<tr><td></td><td><input type="text" name="mchntName" maxlength=100 value="Demo 进件测试商户"></td><td></td></tr>
-<tr><td></td><td><input type="text" name="mchntFullName" maxlength=200 value="中国山东找蓝翔"></td><td>请填写营业执照上的全称</td></tr>
+<tr><td></td><td><input type="text" name="mchntName" maxlength=100 value=""></td><td></td></tr>
+<tr><td></td><td><input type="text" name="mchntFullName" maxlength=200 value=""></td><td>请填写营业执照上的全称</td></tr>
 <tr><td></td><td><input type="text" name="parentMchntId" maxlength=64 value=""></td><td>民生商户号</td></tr>
 <tr><td></td><td><input type="text" name="devType" maxlength=1 value="1"></td><td>1-第三方，2-民生银行</td></tr>
-<tr><td></td><td><input type="text" name="acdCode" maxlength=10 value="350203"></td><td>国标地区码，参考国家统计局发布的“最新县及县以上行政区划代码”。</td></tr>
-<tr><td></td><td><input type="text" name="province" maxlength=20 value="河北省"></td><td>省份名称</td></tr>
-<tr><td></td><td><input type="text" name="city" maxlength=20 value="石家庄市"></td><td>城市名称</td></tr>
-<tr><td></td><td><input type="text" name="address" maxlength=80 value="新华区华西路53号"></td><td></td></tr>
+<tr><td></td><td><input type="text" name="acdCode" maxlength=10 value=""></td><td>国标地区码，参考国家统计局发布的“最新县及县以上行政区划代码”。</td></tr>
+<tr><td></td><td><input type="text" name="province" maxlength=20 value=""></td><td>省份名称</td></tr>
+<tr><td></td><td><input type="text" name="city" maxlength=20 value=""></td><td>城市名称</td></tr>
+<tr><td></td><td><input type="text" name="address" maxlength=80 value=""></td><td></td></tr>
 <tr><td></td><td><input type="text" name="isCert" maxlength=1 value="1"></td><td>1-持证商户，0-非持证商户</td></tr>
-<tr><td></td><td><input type="text" name="licId" maxlength=30 value="35020320160831"></td><td>若没有，可填默认值“-”</td></tr>
-<tr><td></td><td><input type="text" name="licValidity" maxlength=8 value="20301231"></td><td>yyyyMMdd，若没有，可填默认值“-”</td></tr>
-<tr><td></td><td><input type="text" name="corpName" maxlength=60 value="唐门"></td><td></td></tr>
-<tr><td></td><td><input type="text" name="idtCard" maxlength=20 value="130105187808235612"></td><td>若没有，可填默认值“-”</td></tr>
-<tr><td></td><td><input type="text" name="contactName" maxlength=20 value="唐三角"></td><td></td></tr>
-<tr><td></td><td><input type="text" name="telephone" maxlength=11 value="13839795841"></td><td></td></tr>
-<tr><td></td><td><input type="text" name="servTel" maxlength=11 value="13839795841"></td><td></td></tr>
+<tr><td></td><td><input type="text" name="licId" maxlength=30 value=""></td><td>若没有，可填默认值“-”</td></tr>
+<tr><td></td><td><input type="text" name="licValidity" maxlength=8 value=""></td><td>yyyyMMdd，若没有，可填默认值“-”</td></tr>
+<tr><td></td><td><input type="text" name="corpName" maxlength=60 value=""></td><td></td></tr>
+<tr><td></td><td><input type="text" name="idtCard" maxlength=20 value=""></td><td>若没有，可填默认值“-”</td></tr>
+<tr><td></td><td><input type="text" name="contactName" maxlength=20 value=""></td><td></td></tr>
+<tr><td></td><td><input type="text" name="telephone" maxlength=11 value=""></td><td></td></tr>
+<tr><td></td><td><input type="text" name="servTel" maxlength=11 value=""></td><td></td></tr>
 <tr><td></td><td><input type="text" name="identification" maxlength=20></td><td>手机号+MAC</td></tr>
 <tr><td></td><td><input type="text" name="autoSettle" maxlength=1 value="1"></td><td>1-自动结算，2-手工提现</td></tr>
 <tr><td></td><td><input type="text" name="remark" maxlength=100></td><td></td></tr>
 <tr><td></td><td><input type="text" name="message" maxlength=0></td><td></td></tr>
-<tr><td colspan=4 align="center" ><input type="submit" value="Submit" id="b"></td></tr>
-<tr><td colspan=4 align="center"><ol id="o">"*"号标记为必填字段</ol></td></tr>
+<tr><td colspan=4 align="center" ><input id="b" type="submit" value="Submit"></td></tr>
+<tr><td colspan=4 align="center"><ol id="o"><b class="mandatory">必</b>填字段；<b class="option">选</b>填字段</ol></td></tr>
 </table>
 </form>
 </body>
