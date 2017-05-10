@@ -2,7 +2,43 @@
 <head>
 <link rel="stylesheet" type="text/css" href="cmbc.css">
 <script type="text/javascript" src="const.js"></script>
+<script type="text/javascript" src="area2code20170310_1471429.js"></script>
 <script type="text/javascript" src="cmbc.js"></script>
+<script type="text/javascript">
+function so(n,c)
+ {var o=document.getElementsByName("acdCode")[0];
+  if(""!==c&&(""===o.value||n))
+   {o.value=c;
+   }
+ }
+function s(m,e,a)
+ {l=parseInt(e.name.substring(5));
+  e=e.value;
+  var o;
+  o=document.getElementsByName("area_"+(1+l))[0];
+  if(undefined!==o)
+   {o.options.length=0;
+    var k=a[e][1];
+    if(0===Object.keys(k).length)
+     {k={};
+      k[e]=[a[e][0],{}];
+     }
+    for(i in k)
+     {var n=new Option(i,i);
+      o.appendChild(n);
+     }
+    //o.size=o.options.length;
+    o.selectedIndex=0;
+    s(m,o,k);
+   }
+  else
+   {var ao=document.getElementsByName("area_o")[0];
+    ao.value=a[e][0];
+    if(3===m)
+     so(false,ao.value);
+   }
+ }
+</script>
 </head>
 <body>
 <form name="f" onsubmit="return(post());">
@@ -19,7 +55,7 @@
 <tr><td></td><td><input type="text" name="mchntFullName" maxlength=200 value=""></td><td>请填写营业执照上的全称</td></tr>
 <tr><td></td><td><input type="text" name="parentMchntId" maxlength=64 value=""></td><td>民生商户号</td></tr>
 <tr><td></td><td><input type="text" name="devType" maxlength=1 value="1"></td><td>1-第三方，2-民生银行</td></tr>
-<tr><td></td><td><input type="text" name="acdCode" maxlength=10 value=""></td><td>国标地区码，参考国家统计局发布的“最新县及县以上行政区划代码”。</td></tr>
+<tr><td></td><td><input type="text" name="acdCode" maxlength=10 value=""></td><td><select name="area_1" onchange="s(1,this,area2code)"></select><select name="area_2" onchange="s(2,this,area2code[document.getElementsByName('area_1')[0].value][1])"></select><select name="area_3" onchange="s(3,this,area2code[document.getElementsByName('area_1')[0].value][1][document.getElementsByName('area_2')[0].value][1])"></select><input name="area_o" ondblclick="so(true,this.value)" style="width:13%"></td></tr>
 <tr><td></td><td><input type="text" name="province" maxlength=20 value=""></td><td>省份名称</td></tr>
 <tr><td></td><td><input type="text" name="city" maxlength=20 value=""></td><td>城市名称</td></tr>
 <tr><td></td><td><input type="text" name="address" maxlength=80 value=""></td><td></td></tr>

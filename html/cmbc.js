@@ -306,6 +306,15 @@ window.onload=function()
      {n.addEventListener("change",file_change);
      }
    );
+  if("/mchntAdd.html"===window.location.pathname)
+  {var area_1=document.getElementsByName("area_1")[0];
+   for(i in area2code)
+    {var o=new Option(i,i);
+     area_1.appendChild(o);
+    }
+   area_1.selectedIndex=0;
+   s(1,area_1,area2code);
+  }
  }
 
 function f2o()
@@ -313,7 +322,7 @@ function f2o()
   foreach_input
    (function(n)
      {var m=n["name"];
-      if(""!==m)
+      if(""!==m&&"area_"!==m.substring(0,6))
        r[m]=n["value"];
      },
     function(){}

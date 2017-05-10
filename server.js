@@ -50,6 +50,12 @@ app.get
   }
  );
 app.get
+ ('/area2code20170310_1471429.js',function(req,res)
+  {res.setHeader('Content-Encoding','gzip')
+   res.sendFile(__dirname+"/html/"+"area2code20170310_1471429.js.gz");
+  }
+ );
+app.get
  ('/cmbc.js',function(req,res)
   {res.sendFile(__dirname+"/html/"+"cmbc.js");
   }

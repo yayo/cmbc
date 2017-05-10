@@ -8,7 +8,7 @@ var md5s=
  {"321ac5a900847ae77c26696966d62faa":
    {"url":"http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/201703/t20170310_1471429.html",
     "result":
-     {"md5":"b573ae620e04eb8aad6cf45a72e163ce",
+     {"md5":"fc2c5351bdc1348d0c23317ad1e2e597",
       "file":"area2code20170310_1471429.js",
      },
    },
@@ -44,7 +44,7 @@ function l23(r,e1,l,v1)
                             r[l1][1][l2]=[l2k.data,{}];
                            }
                           else if(3===l)
-                           r[l1][1][l2][1][e13.data.substring(2)]=l2k.data;
+                           r[l1][1][l2][1][e13.data.substring(2)]=[l2k.data,{}];
                           else throw(l);
                          }
                         else throw(cheerio.html(e13));
