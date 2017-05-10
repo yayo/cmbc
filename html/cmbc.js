@@ -41,7 +41,7 @@ var c2n=
   "dayLimit":["日限额",1,0,0,1],
   "monthLimit":["月限额",1,0,0,1],
   "fixFeeRate":["固定比例费率",2,0,0,1],
-  "specFeeRate":["特殊费率",2,0,0,1],
+  "specFeeRate":["特殊费率",2,0,0,0],
   "account":["结算账号",1,0,0,1],
   "pbcBankId":["开户行号",0,0,0,1],
   "acctName":["开户人",1,0,0,1],
@@ -71,11 +71,18 @@ function serial()
  }
 
 function out2cmbc(i)
- {if(""!==i.value)
+ {if(""===i)
+   {var params=(new URL(document.location)).searchParams;
+    var i=params.get("outMchntId");
+    if(null!==i)
+     {document.getElementsByName("outMchntId")[0].value=i;
+     }
+   }
+  if(""!==i)
    {var o=document.getElementById("cmbcMchntId");
     if(null!==o&&""==o.value)
      {var http=new XMLHttpRequest();
-      http.open("GET","/out2cmbc?out="+i.value,true);
+      http.open("GET","/out2cmbc?out="+i,true);
       http.onreadystatechange=function()
        {if(4===http.readyState)
          {if(200!==http.status)
@@ -281,7 +288,7 @@ window.onload=function()
   foreach_input
    (function(n)
      {if("outMchntId"===n.name)
-       {out2cmbc(n);
+       {out2cmbc(n.value);
        }
      },
     function(n)

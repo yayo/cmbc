@@ -148,6 +148,9 @@ function Colorful(o)
      {o.errorMsg="<b class=\"success\">"+o.errorMsg+"</b>";
      }
    }
+  if(o.hasOwnProperty("outMchntId")&&""!==o.outMchntId)
+   {o.outMchntId=o.outMchntId+"<b class=\"success\"><a href=\"chnlAdd.html?outMchntId="+o.outMchntId+"\">支付</a>|<a href=\"upload.html?outMchntId="+o.outMchntId+"\">上传</a></b>";
+   }
   if(o.hasOwnProperty("cmbcSignId")&&""!==o.cmbcSignId)
    {o.cmbcSignId="<b class=\"success\">"+o.cmbcSignId+"</b>";
    }
