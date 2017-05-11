@@ -34,8 +34,13 @@ function s(m,e,a)
   else
    {var ao=document.getElementsByName("area_o")[0];
     ao.value=a[e][0];
-    if(3===m)
-     so(false,ao.value);
+    //if(3===m)
+     {
+      //so(false,ao.value);
+      document.getElementsByName('province')[0].value=document.getElementsByName('area_1')[0].value
+      document.getElementsByName('city')[0].value=document.getElementsByName('area_2')[0].value
+      so(true,ao.value);
+     }
    }
  }
 </script>
@@ -55,10 +60,11 @@ function s(m,e,a)
 <tr><td></td><td><input type="text" name="mchntFullName" maxlength=200 value=""></td><td>请填写营业执照上的全称</td></tr>
 <tr><td></td><td><input type="text" name="parentMchntId" maxlength=64 value=""></td><td>民生商户号</td></tr>
 <tr><td></td><td><select name="devType" maxlength=1><option value=1 selected>第三方</option><option value=2>民生银行</option></select><td>1-第三方，2-民生银行</td></tr>
-<tr><td></td><td><input type="text" name="acdCode" maxlength=10 value=""></td><td><select name="area_1" onchange="s(1,this,area2code)"></select><select name="area_2" onchange="s(2,this,area2code[document.getElementsByName('area_1')[0].value][1])"></select><select name="area_3" onchange="s(3,this,area2code[document.getElementsByName('area_1')[0].value][1][document.getElementsByName('area_2')[0].value][1])"></select><input name="area_o" ondblclick="so(true,this.value)" style="width:13%"></td></tr>
-<tr><td></td><td><input type="text" name="province" maxlength=20 value=""></td><td>省份名称</td></tr>
-<tr><td></td><td><input type="text" name="city" maxlength=20 value=""></td><td>城市名称</td></tr>
+<tr><td></td><td><select name="area_1" onchange="s(1,this,area2code)"></select></td><td><input disabled readonly type="text" name="province" maxlength=20 value=""></td></tr>
+<tr><td></td><td><select name="area_2" onchange="s(2,this,area2code[document.getElementsByName('area_1')[0].value][1])"></select></td><td><input disabled readonly type="text" name="city" maxlength=20 value=""></td></tr>
+<tr><td></td><td><select name="area_3" onchange="s(3,this,area2code[document.getElementsByName('area_1')[0].value][1][document.getElementsByName('area_2')[0].value][1])"></select></td><td></td></tr>
 <tr><td></td><td><input type="text" name="address" maxlength=80 value=""></td><td></td></tr>
+<tr><td></td><td><input type="text" name="acdCode" maxlength=10 value=""></td><td><input disabled readonly name="area_o" ondblclick="so(true,this.value)" style="width:13%"></td></tr>
 <tr><td></td><td><select name="isCert" maxlength=1><option value=1 selected>持证商户</option><option value=0>非持证商户</option></select><td>1-持证商户，0-非持证商户</td></tr>
 <tr><td></td><td><input type="text" name="licId" maxlength=30 value=""></td><td>若没有，可填默认值“-”</td></tr>
 <tr><td></td><td><input type="text" name="licValidity" maxlength=8 value=""></td><td>yyyyMMdd，若没有，可填默认值“-”</td></tr>
