@@ -1,0 +1,19 @@
+CACHE MANIFEST
+NETWORK:
+/time?t=1495079780
+CACHE:
+/favicon.ico
+/spark-md5.js
+/area2code20170310_1471429.js
+/cmbc.css
+/cmbc.js
+/index.html
+/mchntAdd.html
+/mchntUpd.html
+/chnlAdd.html
+/chnlUpd.html
+/queryChnl.html
+/queryMchnt.html
+/upload.html
+FALLBACK:
+/const.js /offline.js

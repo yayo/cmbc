@@ -9,7 +9,7 @@ exports.server=
 exports.credentials=
  {cmbc: __dirname+"/cert/cmbcTest.cer",
   my:
-   {platformId: "A00002016090000000125",
+   {platformId: "A00002016120000000294",
     key:
      {file: __dirname+"/cert/cust0001.sm2",
       password: "123123"

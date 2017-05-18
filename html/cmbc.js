@@ -51,7 +51,7 @@ var c2n=
   "servTel":["客服电话",1,1,0,0,0],
   "identification":["客户识别码",1,0,0,0,0],
   "autoSettle":["结算方式",1,1,0,0,0],
-  "industryId":["商户类别",0,1,0,0,0],
+  "industryId":["商户类别",1,1,0,0,0],
   "operateType":["接入类型",0,1,0,0,0],
   "dayLimit":["日限额",1,1,0,0,0],
   "monthLimit":["月限额",1,1,0,0,0],
@@ -78,8 +78,8 @@ var c2n=
 
 function serial()
  {var t=Math.random();
-  t=(""+t).substring(2);
-  t=t+("0".repeat(18-t.length));
+  t=(""+t).substring(2,18);
+  t=t+("0".repeat(16-t.length));
   return((new Date).getTime()+""+t);
  }
 
@@ -347,7 +347,8 @@ function f2o()
  }
 
 function Colorful(o)
- {
+ {if(o.hasOwnProperty("platformId")&&""!==o.platformId)
+   o.platformId+="&nbsp;<b class=\"success\"><a href=\"chnlAdd.html\">支付</a>&nbsp;<a href=\"upload.html\">上传</a></b>";
   if(o.hasOwnProperty("respCode"))
    {if("0000"!==o.respCode)
      {o.respCode="<b class=\"failed\">"+o.respCode+"</b>";
@@ -413,7 +414,7 @@ function onreadystatechange(http,b0,ts,t,next,c)
  {http.onreadystatechange=function()
    {if(4===http.readyState)
      {if(200!==http.status)
-       {alert(http.statusText);
+       {alert("http.status: "+http.status);
        }
       else
        {var l=document.createElement("li");

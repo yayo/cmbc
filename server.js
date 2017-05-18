@@ -36,39 +36,62 @@ var db=new sqlite.Database
    }
  );
 app.get
- ('/',function(req,res)
+ ("/",function(req,res)
   {res.redirect("/index.html");
   }
  );
 app.get
- ('/cmbc.css',function(req,res)
-  {res.sendFile(__dirname+"/html/"+"cmbc.css");
+ ("/time",function(req,res)
+  {res.setHeader("Content-Type","text/plain; charset=UTF-8");
+   res.setHeader("Cache-Control","no-cache");
+   res.end((new Date()).toISOString()+"\r\n"+req.connection.localAddress+":"+req.connection.localPort+"\r\n"+req.headers["host"]+"\r\n"+req.connection.remoteAddress+":"+req.connection.remotePort+"\r\n"+req.headers["user-agent"]);
   }
  );
 app.get
- ('/const.js',function(req,res)
-  {res.end("var platformId=\""+config.credentials.my.platformId+"\";");
+ ("/favicon.ico",function(req,res)
+  {res.sendFile(__dirname+"/html/"+"favicon.ico");
   }
  );
 app.get
- ('/area2code20170310_1471429.js',function(req,res)
-  {res.setHeader('Content-Encoding','gzip');
-   res.sendFile(__dirname+"/html/"+"area2code20170310_1471429.js.gz");
+ ("/cache.manifest",function(req,res)
+  {res.setHeader("Content-Type","text/cache-manifest");
+   res.sendFile(__dirname+"/html/"+"cache.manifest");
   }
  );
 app.get
- ('/cmbc.js',function(req,res)
-  {res.sendFile(__dirname+"/html/"+"cmbc.js");
+ ("/offline.js",function(req,res)
+  {res.sendFile(__dirname+"/html/"+"offline.js");
   }
  );
 app.get
- ('/spark-md5.js',function(req,res)
+ ("/spark-md5.js",function(req,res)
   {res.setHeader('Content-Encoding','gzip');
    res.sendFile(__dirname+"/html/"+"spark-md5.js.gz");
   }
  );
 app.get
- ('/out2cmbc',function(req,res)
+ ("/area2code20170310_1471429.js",function(req,res)
+  {res.setHeader("Content-Encoding","gzip");
+   res.sendFile(__dirname+"/html/"+"area2code20170310_1471429.js.gz");
+  }
+ );
+app.get
+ ("/cmbc.css",function(req,res)
+  {res.sendFile(__dirname+"/html/"+"cmbc.css");
+  }
+ );
+app.get
+ ("/const.js",function(req,res)
+  {res.end("var platformId=\""+config.credentials.my.platformId+"\";");
+  }
+ );
+app.get
+ ("/cmbc.js",function(req,res)
+  {res.sendFile(__dirname+"/html/"+"cmbc.js");
+  }
+ );
+app.get
+ ("/out2cmbc",function(req,res)
   {if(undefined===req.query["out"])
     {res.end("");
     }
@@ -99,49 +122,48 @@ app.get
   }
  );
 app.get
- ('/index.html',function(req,res)
+ ("/index.html",function(req,res)
   {res.sendFile(__dirname+"/html/"+"index.html");
   }
  );
 app.get
- ('/mchntAdd.html',function(req,res)
+ ("/mchntAdd.html",function(req,res)
   {res.sendFile( __dirname+ "/html/" + "mchntAdd.html" );
   }
  );
 app.get
- ('/mchntUpd.html',function(req,res)
+ ("/mchntUpd.html",function(req,res)
   {res.sendFile( __dirname+ "/html/" + "mchntUpd.html" );
   }
  );
 app.get
- ('/queryMchnt.html',function(req,res)
+ ("/queryMchnt.html",function(req,res)
   {res.sendFile( __dirname+ "/html/" + "queryMchnt.html" );
   }
  );
 app.get
- ('/chnlAdd.html',function(req,res)
+ ("/chnlAdd.html",function(req,res)
   {res.sendFile( __dirname+ "/html/" + "chnlAdd.html" );
   }
  );
 app.get
- ('/chnlUpd.html',function(req,res)
+ ("/chnlUpd.html",function(req,res)
   {res.sendFile( __dirname+ "/html/" + "chnlUpd.html" );
   }
  );
 app.get
- ('/queryChnl.html',function(req,res)
+ ("/queryChnl.html",function(req,res)
   {res.sendFile( __dirname+ "/html/" + "queryChnl.html" );
   }
  );
 app.get
- ('/upload.html',function(req,res)
+ ("/upload.html",function(req,res)
   {res.sendFile( __dirname+ "/html/" + "upload.html" );
   }
  );
 
 function encode(res,i)
- {
-  if(!i.hasOwnProperty("txnSeq")||!i.hasOwnProperty("platformId")||""===i.txnSeq||i.platformId!==config.credentials.my.platformId)
+ {if(!i.hasOwnProperty("txnSeq")||!i.hasOwnProperty("platformId")||""===i.txnSeq||i.platformId!==config.credentials.my.platformId)
    {res.end(JSON.stringify({"Error":"txnSeq||platformId"}));
     return(undefined);
    }
@@ -167,8 +189,7 @@ function encode(res,i)
  }
 
 function decode(p,res,action,err,cmbc,download)
- {
-  if(err)
+ {if(err)
    {res.end(JSON.stringify(err));
    }
   else if(cmbc.statusCode!=200)
@@ -201,8 +222,7 @@ function decode(p,res,action,err,cmbc,download)
              {res.end(JSON.stringify({"Error":"platformId||txnSeq"}));
              }
             else
-             {cmbc.platformId+="&nbsp;<b class=\"success\"><a href=\"chnlAdd.html\">支付</a>&nbsp;<a href=\"upload.html\">上传</a></b>";
-              if(cmbc.hasOwnProperty("cmbcMchntId")&&""!==cmbc.cmbcMchntId)
+             {if(cmbc.hasOwnProperty("cmbcMchntId")&&""!==cmbc.cmbcMchntId)
                {if("mchntAdd"===action)
                  {db.exec
                    ("INSERT INTO out2cmbc values(\""+cmbc.outMchntId+"\",\""+cmbc.cmbcMchntId+"\");",
