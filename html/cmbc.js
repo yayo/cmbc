@@ -21,10 +21,10 @@ var edType=
  }
 
 var c2n=
- {/*code: name | cookie | mandatory | disabled | readonly | hidden */
+ {/*code: name | storage | mandatory | disabled | readonly | hidden */
   "txnSeq":["流水号",0,1,1,1,0],
   "platformId":["平台号",0,1,1,1,0],
-  "operId":["拓展人员编号",1,1,0,0,0],
+  "operId":["拓展人员编号",2,1,0,0,0],
   "dataSrc":["进件渠道",0,1,1,1,0],
   "outMchntId":["外部商户号",1,1,0,0,0],
   "cmbcMchntId":["民生商户号",1,1,0,0,0],
@@ -87,21 +87,26 @@ function out2cmbc(i)
  {if(""!==i.value)
    {var o=document.getElementsByName("cmbcMchntId")[0];
     if(undefined!==o&&null!==o&&""===o.value)
-     {var http=new XMLHttpRequest();
-      http.open("GET","/out2cmbc?out="+i.value,true);
-      http.onreadystatechange=function()
-       {if(4===http.readyState)
-         {if(200!==http.status)
-           {alert(http.statusText);
+     {var v;
+      if((null!==(v=sessionStorage.getItem("cmbcMchntId"))&&""!==v)||(null!==(v=localStorage.getItem("out2cmbc_"+i.value))&&""!==v))
+       o.value=v;
+      else
+       {v=new XMLHttpRequest();
+        v.open("GET","/out2cmbc?out="+i.value,true);
+        v.onreadystatechange=function()
+         {if(4===v.readyState)
+           {if(200!==v.status)
+             {alert("HTTP_STATUS: "+v.status);
+             }
+            else
+             {v=v.responseText.trim();
+              if(""!==v)
+               o.value=v;
+             }
            }
-          else
-           {http=http.responseText.trim();
-            if(""!==http)
-             o.value=http;
-           }
-         }
-       };
-      http.send();
+         };
+        v.send();
+       }
      }
    }
  }
@@ -303,14 +308,12 @@ window.onload=function()
   
     foreach_input
      (function(n)
-       {if(c2n.hasOwnProperty(n.name) && 1===c2n[n.name][1])
+       {if(c2n.hasOwnProperty(n.name) && 0<c2n[n.name][1])
          {//i=document.cookie.replace((new RegExp("(?:(?:^|.*;\\s*)"+n.name+"\\s*\\=\\s*([^;]*).*$)|^.*$")),"$1");
-          i=localStorage.getItem(n.name);
-          if(null!==i&&""!==i)
+          if((null!==(i=sessionStorage.getItem(n.name))&&""!==i)||(null!==(i=localStorage.getItem(n.name))&&""!==i))
            n.value=i;
-         }
-        if("outMchntId"===n.name)
-         { //out2cmbc(n);
+          if("outMchntId"===n.name)
+           out2cmbc(n);
          }
        },
       function(n)
@@ -346,36 +349,35 @@ function f2o()
   return r;
  }
 
-function Colorful(o)
- {if(o.hasOwnProperty("platformId")&&""!==o.platformId)
-   o.platformId+="&nbsp;<b class=\"success\"><a href=\"chnlAdd.html\">支付</a>&nbsp;<a href=\"upload.html\">上传</a></b>";
-  if(o.hasOwnProperty("respCode"))
-   {if("0000"!==o.respCode)
-     {o.respCode="<b class=\"failed\">"+o.respCode+"</b>";
+function Colorful(k,v)
+ {if(""===v)
+   return(v);
+  else
+   {switch(k)
+     {case "platformId":
+       v+="&nbsp;<b class=\"success\"><a href=\"chnlAdd.html\">支付</a>&nbsp;<a href=\"upload.html\">上传</a></b>";
+       return(v);
+      case "respCode":
+       if("0000"!==v)
+        return("<b class=\"failed\">"+v+"</b>");
+       else
+        return("<b class=\"success\">"+v+"</b>");
+      case "errorMsg":
+       if("执行成功"!==v)
+        return("<b class=\"failed\">"+v+"</b>");
+       else
+        return("<b class=\"success\">"+v+"</b>");
+      case "cmbcMchntId":
+      case "cmbcSignId":
+        return("<b class=\"success\">"+v+"</b>");
+      default:
+       return(v);
      }
-    else
-     {o.respCode="<b class=\"success\">"+o.respCode+"</b>";
-     }
-   }
-  if(o.hasOwnProperty("errorMsg"))
-   {if("执行成功"!==o.errorMsg)
-     {o.errorMsg="<b class=\"failed\">"+o.errorMsg+"</b>";
-     }
-    else
-     {o.errorMsg="<b class=\"success\">"+o.errorMsg+"</b>";
-     }
-   }
-  if(o.hasOwnProperty("cmbcMchntId")&&""!==o.cmbcMchntId)
-   {o.cmbcMchntId="<b class=\"success\">"+o.cmbcMchntId+"</b>";
-   }
-  if(o.hasOwnProperty("cmbcSignId")&&""!==o.cmbcSignId)
-   {o.cmbcSignId="<b class=\"success\">"+o.cmbcSignId+"</b>";
    }
  }
 
 function o2t(o)
  {o=JSON.parse(o);
-  Colorful(o);
   var t=document.createElement("table");
   for(i in o)
    {var r=document.createElement("tr");
@@ -388,13 +390,22 @@ function o2t(o)
     v.appendChild(document.createTextNode(c2n.hasOwnProperty(i)?c2n[i][0]:""));
     r.appendChild(v);
     v=document.createElement("td");
-    v.innerHTML=o[i];
+    v.innerHTML=Colorful(i,o[i]);
     r.appendChild(v);
-    if(c2n.hasOwnProperty(i) && 1===c2n[i][1])
-     {v=v.innerText;
+    if(c2n.hasOwnProperty(i) && 0<c2n[i][1])
+     {v=o[i];
       if(""!==v)
        {//document.cookie=i+"="+v+"; Path=/";
-        localStorage.setItem(i,v);
+        switch(c2n[i][1])
+         {case 2:
+           localStorage.setItem(i,v);break;
+          case 1:
+           sessionStorage.setItem(i,v);
+           if("cmbcMchntId"===i&&o.hasOwnProperty("respCode")&&"0000"===o["respCode"]&&o.hasOwnProperty("outMchntId")&&""!==(i=o["outMchntId"]))
+            localStorage.setItem("out2cmbc_"+i,v);
+           break;
+          default:break;
+         }
        }
      }
    }
@@ -414,7 +425,7 @@ function onreadystatechange(http,b0,ts,t,next,c)
  {http.onreadystatechange=function()
    {if(4===http.readyState)
      {if(200!==http.status)
-       {alert("http.status: "+http.status);
+       {alert("HTTP_STATUS: "+http.status);
        }
       else
        {var l=document.createElement("li");
