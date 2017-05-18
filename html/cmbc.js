@@ -446,11 +446,20 @@ function onreadystatechange(http,b0,ts,t,next,c)
 
 function http_processing(b,p,b0,ts,t,next,c)
  {var http=new XMLHttpRequest();
+  onreadystatechange(http,b0,ts,t,next,c);
+  var g=document.getElementById("p");
+  if(null!==g)
+   {http.upload.onprogress=function(e)
+     {if(e.lengthComputable)
+       {g.value=(e.loaded/e.total)*100;
+        document.f.b.value="Uploading ... "+edType[t][0]+" : "+g.value+"%";
+       }
+     };
+   }
   http.open("POST",window.location,true);
   if(""!==p)
    {http.setRequestHeader("Content-type",p);
    }
-  onreadystatechange(http,b0,ts,t,next,c);
   http.send(b);
  }
 
