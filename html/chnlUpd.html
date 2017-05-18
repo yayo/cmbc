@@ -16,11 +16,11 @@
 <tr><td></td><td><input type="text" onblur="out2cmbc(this)" name="outMchntId" maxlength=64 value=""></td><td>与商户基础信息注册时参数一致</td></tr>
 <tr><td></td><td><input type="text" name="cmbcMchntId" maxlength=21 value=""></td><td>要与商户基础信息注册时参数一致</td></tr> 
 <tr><td></td><td><input type="text" name="cmbcSignId" maxlength=21 value=""></td><td>民生为每个账户分配一个唯一的编号</td></tr>
-<tr><td></td><td><input type="text" name="apiCode" maxlength=4 value="0005"></td><td>0005：微信；0007：支付宝；0008：QQ钱包</td></tr>
-<tr><td></td><td><input type="text" name="fixFeeRate" maxlength=100 value="0.38"></td><td>0.50%：0.50小数点后精确到2位</td></tr>
+<tr><td></td><td><select name="apiCode" maxlength=4><option value="0005" selected>微信</option><option value="0007">支付宝</option><option value="0008">QQ钱包</option></select></td><td>0005：微信；0007：支付宝；0008：QQ钱包</td></tr>
+<tr><td></td><td><input type="text" name="fixFeeRate" maxlength=100 value=""></td><td>0.50%：0.50小数点后精确到2位</td></tr>
 <tr><td></td><td><input type="text" name="specFeeRate" maxlength=100 value=""></td><td>具体说明请见表后</td></tr>
-<tr><td></td><td><input type="text" name="dayLimit" maxlength=12 value="2000000"></td><td>单位：分</td></tr>
-<tr><td></td><td><input type="text" name="monthLimit" maxlength=12 value="5000000"></td><td>单位：分</td></tr>
+<tr><td></td><td><input type="text" name="dayLimit" maxlength=12 value=""></td><td>单位：分</td></tr>
+<tr><td></td><td><input type="text" name="monthLimit" maxlength=12 value=""></td><td>单位：分</td></tr>
 <tr><td></td><td><select name="acctType" maxlength=1><option value=1>对私</option><option value=2 selected>对公</option></select><td>1-- 私，2-对公</td></tr>
 <tr><td></td><td><input type="text" name="pbcBankId" maxlength=12 value=""></td><td>大小额行号，非民生账户必填</td></tr>
 <tr><td></td><td><input type="text" name="acctName" maxlength=200 value=""></td><td></td></tr>
@@ -31,7 +31,7 @@
 <tr><td></td><td><input type="text" name="message" maxlength=200 value=""></td><td>通道其他信息，以json格式传入</td></tr>
 <tr><td colspan=4 align="center" ><input id="b" type="submit" value="Submit"></td></tr>
 <tr style="display:none"><td colspan=4 align="center">固定比例费率，填除去%之后的值，例如：0.35%，则填 0.35<br>特殊费率，则按[A]+[B]+[C]格式填写，说明如下：<br>A:保底金额；B:比例；C:比例起算金额<br>例一：0.35%，则填写规则为[0]+[0.35]+[0]<br>例二：1000 以下 2 元，超过 1000，2+（超过部分*0.2%），则填写规则为[2]+[0.2]+[1000]<br>例三：2+（消费金额*0.2%），则填写规则为[2]+[0.2]+[0]<br></td></tr>
-<tr><td colspan=4 align="center"><ol id="o"><b class="mandatory">必</b>填字段；<b class="option">选</b>填字段</ol></td></tr>
+<tr><td colspan=4 align="center"><ol id="o"><b class="mandatory">必</b>填；<b class="option">选</b>填</ol></td></tr>
 </table>
 </form>
 </body>

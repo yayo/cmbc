@@ -21,59 +21,59 @@ var edType=
  }
 
 var c2n=
- {/*code: name | mandatory | disabled | readonly | hidden */
-  "txnSeq":["流水号",1,1,1,0],
-  "platformId":["平台号",1,1,1,0],
-  "operId":["拓展人员编号",1,0,0,0],
-  "dataSrc":["进件渠道",1,1,1,0],
-  "outMchntId":["外部商户号",1,0,0,0],
-  "cmbcMchntId":["民生商户号",1,0,0,0],
-  "mchntName":["商户简称",1,0,0,0],
-  "mchntFullName":["公司全称",1,0,0,0],
-  "parentMchntId":["父商户",0,0,0,0],
-  "devType":["拓展模式",1,0,0,0],
-  "acdCode":["区域代码",1,1,1,0],
-  "province":["省份",1,0,0,0],
-  "area_1":["省份",1,0,0,0],
-  "city":["城市",1,0,0,0],
-  "area_2":["城市",1,0,0,0],
-  "area_3":["区县",1,0,0,0],
-  "address":["地址",1,0,0,0],
-  "isCert":["是否持证",1,0,0,0],
-  "licId":["营业执照号",1,0,0,0],
-  "licValidity":["营业执照有效期",1,0,0,0],
-  "corpName":["法人/联系人",1,0,0,0],
-  "idtCard":["法人/联系人证件号",1,0,0,0],
-  "contactName":["负责人",1,0,0,0],
-  "telephone":["负责人手机号",1,0,0,0],
-  "servTel":["客服电话",1,0,0,0],
-  "identification":["客户识别码",0,0,0,0],
-  "autoSettle":["结算方式",1,0,0,0],
-  "industryId":["商户类别",1,0,0,0],
-  "operateType":["接入类型",1,0,0,0],
-  "dayLimit":["日限额",1,0,0,0],
-  "monthLimit":["月限额",1,0,0,0],
-  "fixFeeRate":["固定比例费率",2,0,0,0],
-  "specFeeRate":["特殊费率",2,0,0,0],
-  "account":["结算账号",1,0,0,0],
-  "pbcBankId":["开户行号",0,0,0,0],
-  "acctName":["开户人",1,0,0,0],
-  "acctType":["账户类型",1,0,0,0],
-  "idType":["开户人证件类型",0,0,0,0],
-  "idCode":["证件号码",0,0,0,0],
-  "acctTelePhone":["开户人预留手机号",0,0,0,0],
-  "edType":["资料分类",1,0,0,0],
-  "upFileCount":["本次上传文件数 ",1,0,0,0],
-  "md5s":["资料MD5",1,0,0,0],
-  "remark":["备注",0,0,0,0],
-  "message":["备用字段",0,0,0,0],
-  "service":["接口类型",1,0,0,0],
-  "status":["商户状态",1,0,0,0],
-  "cmbcSignId":["民生签约编号",1,0,0,0],
-  "apiCode":["支付通道",1,0,0,0],
-  "respCode":["返回码",1,0,0,0],
-  "errorMsg":["错误信息",1,0,0,0],
-  "refuseMsg":["拒绝原因",0,0,0,0],
+ {/*code: name | cookie | mandatory | disabled | readonly | hidden */
+  "txnSeq":["流水号",0,1,1,1,0],
+  "platformId":["平台号",0,1,1,1,0],
+  "operId":["拓展人员编号",1,1,0,0,0],
+  "dataSrc":["进件渠道",0,1,1,1,0],
+  "outMchntId":["外部商户号",1,1,0,0,0],
+  "cmbcMchntId":["民生商户号",1,1,0,0,0],
+  "cmbcSignId":["民生签约编号",1,1,0,0,0],
+  "apiCode":["支付通道",1,1,0,0,0],
+  "mchntName":["商户简称",1,1,0,0,0],
+  "mchntFullName":["公司全称",1,1,0,0,0],
+  "parentMchntId":["父商户",0,0,0,0,0],
+  "devType":["拓展模式",0,1,0,0,0],
+  "acdCode":["区域代码",0,1,1,1,0],
+  "province":["省份",0,1,0,0,0],
+  "area_1":["省份",0,1,0,0,0],
+  "city":["城市",0,1,0,0,0],
+  "area_2":["城市",0,1,0,0,0],
+  "area_3":["区县",0,1,0,0,0],
+  "address":["地址",1,1,0,0,0],
+  "isCert":["是否持证",1,1,0,0,0],
+  "licId":["营业执照号",1,1,0,0,0],
+  "licValidity":["营业执照有效期",1,1,0,0,0],
+  "corpName":["法人/联系人",1,1,0,0,0],
+  "idtCard":["法人/联系人证件号",1,1,0,0,0],
+  "contactName":["负责人",1,1,0,0,0],
+  "telephone":["负责人手机号",1,1,0,0,0],
+  "servTel":["客服电话",1,1,0,0,0],
+  "identification":["客户识别码",1,0,0,0,0],
+  "autoSettle":["结算方式",1,1,0,0,0],
+  "industryId":["商户类别",0,1,0,0,0],
+  "operateType":["接入类型",0,1,0,0,0],
+  "dayLimit":["日限额",1,1,0,0,0],
+  "monthLimit":["月限额",1,1,0,0,0],
+  "fixFeeRate":["固定比例费率",1,2,0,0,0],
+  "specFeeRate":["特殊费率",1,2,0,0,0],
+  "account":["结算账号",1,1,0,0,0],
+  "pbcBankId":["开户行号",1,0,0,0,0],
+  "acctName":["开户人",1,1,0,0,0],
+  "acctType":["账户类型",1,1,0,0,0],
+  "idType":["开户人证件类型",1,0,0,0,0],
+  "idCode":["证件号码",1,0,0,0,0],
+  "acctTelePhone":["开户人预留手机号",1,0,0,0,0],
+  "edType":["资料分类",0,1,0,0,0],
+  "upFileCount":["本次上传文件数 ",0,1,0,0,0],
+  "md5s":["资料MD5",0,1,0,0,0],
+  "remark":["备注",1,0,0,0,0],
+  "message":["备用字段",1,0,0,0,0],
+  "service":["接口类型",0,1,0,0,0],
+  "status":["商户状态",0,1,0,0,0],
+  "respCode":["返回码",0,1,0,0,0],
+  "errorMsg":["错误信息",0,1,0,0,0],
+  "refuseMsg":["拒绝原因",0,0,0,0,0],
  };
 
 function serial()
@@ -84,13 +84,9 @@ function serial()
  }
 
 function out2cmbc(i)
- {if(""===i.value)
-   {var p=(new URL(document.location)).searchParams;
-    i.value=p.get("outMchntId");
-   }
-  if(""!==i.value)
+ {if(""!==i.value)
    {var o=document.getElementsByName("cmbcMchntId")[0];
-    if(null!==o&&""==o.value)
+    if(undefined!==o&&null!==o&&""===o.value)
      {var http=new XMLHttpRequest();
       http.open("GET","/out2cmbc?out="+i.value,true);
       http.onreadystatechange=function()
@@ -99,9 +95,9 @@ function out2cmbc(i)
            {alert(http.statusText);
            }
           else
-           {var v=http.responseText.trim();
-            if(""!==v)
-             o.value=v;
+           {http=http.responseText.trim();
+            if(""!==http)
+             o.value=http;
            }
          }
        };
@@ -115,10 +111,12 @@ function foreach_input(i,f)
   for(var e=0;e<t.length;e++)
    {var n=t[e];
     var m=n["name"];
-    if("file"==n.getAttribute('type')&&9===m.length&&"file_0"===m.substring(0,6))
-     f(n);
-    else
-     i(n);
+    if(""!==m)
+     {if("file"==n.getAttribute('type')&&9===m.length&&"file_0"===m.substring(0,6))
+       f(n);
+      else
+       i(n);
+     }
    }
  }
 
@@ -250,21 +248,21 @@ window.onload=function()
      {var n=r.cells[1].firstChild.name;
       if(c2n.hasOwnProperty(n))
        {r.cells[0].innerText=c2n[n][0];
-        if(0===c2n[n][1])
+        if(0===c2n[n][2])
          {r.cells[1].firstChild.classList.add("option");
           //r.cells[2].innerText="";
          }
-        else if(1===c2n[n][1])
+        else if(1===c2n[n][2])
          {r.cells[1].firstChild.classList.add("mandatory");
           //r.cells[2].innerText="*";
          }
-        else if(2===c2n[n][1])
+        else if(2===c2n[n][2])
          {r.cells[1].firstChild.classList.add("oneintwo");
           //r.cells[2].innerText=?;
          }
-        r.cells[1].firstChild.disabled=(0!==c2n[n][2]);
-        r.cells[1].firstChild.readOnly=(0!==c2n[n][3]);
-        if(0!==c2n[n][4])
+        r.cells[1].firstChild.disabled=(0!==c2n[n][3]);
+        r.cells[1].firstChild.readOnly=(0!==c2n[n][4]);
+        if(0!==c2n[n][5])
          {r.style.display="none";
          }
         else
@@ -301,8 +299,13 @@ window.onload=function()
 
   foreach_input
    (function(n)
-     {if("outMchntId"===n.name)
-       {out2cmbc(n);
+     {if(c2n.hasOwnProperty(n.name) && 1===c2n[n.name][1])
+       {i=document.cookie.replace((new RegExp("(?:(?:^|.*;\\s*)"+n.name+"\\s*\\=\\s*([^;]*).*$)|^.*$")),"$1");
+        if(""!==i)
+         n.value=i;
+       }
+      if("outMchntId"===n.name)
+       { //out2cmbc(n);
        }
      },
     function(n)
@@ -325,8 +328,12 @@ function f2o()
   foreach_input
    (function(n)
      {var m=n["name"];
-      if(""!==m&&"area_"!==m.substring(0,6))
-       r[m]=n["value"];
+      if(""!==m)
+       {if("area_"===m.substring(0,6)){}
+        else
+         {r[m]=n["value"];
+         }
+       }
      },
     function(){}
    );
@@ -349,6 +356,11 @@ function o2t(o)
     v=document.createElement("td");
     v.innerHTML=o[i];
     r.appendChild(v);
+    if(c2n.hasOwnProperty(i) && 1===c2n[i][1])
+     {v=v.innerText;
+      if(""!==v)
+       document.cookie=i+"="+v+"; Path=/";
+     }
    }
   t.border="true";
   return(t);

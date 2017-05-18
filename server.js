@@ -11,6 +11,7 @@ var md5=require("md5");
 var sqlite=require("sqlite3");
 
 var app=express();
+app.disable("x-powered-by");
 var jsonParser=bodyParser.json({extended: false})
 java.classpath.push(__dirname+"/SADK-CMBC-3.1.0.8.jar");
 
@@ -51,7 +52,7 @@ app.get
  );
 app.get
  ('/area2code20170310_1471429.js',function(req,res)
-  {res.setHeader('Content-Encoding','gzip')
+  {res.setHeader('Content-Encoding','gzip');
    res.sendFile(__dirname+"/html/"+"area2code20170310_1471429.js.gz");
   }
  );
@@ -62,7 +63,8 @@ app.get
  );
 app.get
  ('/spark-md5.js',function(req,res)
-  {res.sendFile(__dirname+"/html/"+"spark-md5.js");
+  {res.setHeader('Content-Encoding','gzip');
+   res.sendFile(__dirname+"/html/"+"spark-md5.js.gz");
   }
  );
 app.get
@@ -154,8 +156,8 @@ function Colorful(o)
      {o.errorMsg="<b class=\"success\">"+o.errorMsg+"</b>";
      }
    }
-  if(o.hasOwnProperty("outMchntId")&&""!==o.outMchntId)
-   {o.outMchntId=o.outMchntId+"<b class=\"success\"><a href=\"chnlAdd.html?outMchntId="+o.outMchntId+"\">支付</a>|<a href=\"upload.html?outMchntId="+o.outMchntId+"\">上传</a></b>";
+  if(o.hasOwnProperty("cmbcMchntId")&&""!==o.cmbcMchntId)
+   {o.cmbcMchntId="<b class=\"success\">"+o.cmbcMchntId+"</b>";
    }
   if(o.hasOwnProperty("cmbcSignId")&&""!==o.cmbcSignId)
    {o.cmbcSignId="<b class=\"success\">"+o.cmbcSignId+"</b>";
@@ -189,7 +191,7 @@ function encode(res,i)
    }
  }
 
-function decode(p,res,err,cmbc,download,process)
+function decode(p,res,action,err,cmbc,download)
  {
   if(err)
    {res.end(JSON.stringify(err));
@@ -219,16 +221,25 @@ function decode(p,res,err,cmbc,download,process)
            {res.end(JSON.stringify({"Error":"verify"}));
            }
           else
-           {
-            cmbc=JSON.parse(cmbc.body);
+           {cmbc=JSON.parse(cmbc.body);
             if(!cmbc.hasOwnProperty("txnSeq")||!cmbc.hasOwnProperty("platformId")||!cmbc.hasOwnProperty("outMchntId")||cmbc.txnSeq!==p.txnSeq||cmbc.outMchntId!==p.outMchntId||cmbc.platformId!==config.credentials.my.platformId)
              {res.end(JSON.stringify({"Error":"platformId||txnSeq"}));
              }
             else
-             {
-              delete(cmbc.platformId);
+             {cmbc.platformId+="&nbsp;<b class=\"success\"><a href=\"chnlAdd.html\">支付</a>&nbsp;<a href=\"upload.html\">上传</a></b>";
+              if(cmbc.hasOwnProperty("cmbcMchntId")&&""!==cmbc.cmbcMchntId)
+               {if("mchntAdd"===action)
+                 {db.exec
+                   ("INSERT INTO out2cmbc values(\""+cmbc.outMchntId+"\",\""+cmbc.cmbcMchntId+"\");",
+                    function(err)
+                     {if(null!==err)
+                       console.log(err);
+                     }
+                   );
+                 }
+               }
               Colorful(cmbc);
-              process(cmbc);
+              res.end(JSON.stringify(cmbc));
              }
            }
          }
@@ -240,7 +251,7 @@ function decode(p,res,err,cmbc,download,process)
    }
  }
 
-function post(req,res,action,process)
+function post(req,res,action)
  {console.log(req.connection.remoteAddress+":"+req.connection.remotePort);
   console.log(req.body);
   var body=encode(res,req.body);
@@ -250,39 +261,18 @@ function post(req,res,action,process)
     request.post
      ({"url":url,"headers":{"Content-Type":"application/json"},"body":JSON.stringify(body)},
       function(e,cmbc,download)
-       {decode(req.body,res,e,cmbc,download,process);
+       {decode(req.body,res,action,e,cmbc,download);
        }
      );
    }
  }
 
-app.post
-('/mchntAdd.html',jsonParser,
-  function(req,res)
-   {post
-     (req,res,"mchntAdd",
-      function(o)
-       {if(o.hasOwnProperty("cmbcMchntId")&&""!==o.cmbcMchntId)
-         {db.exec
-           ("INSERT INTO out2cmbc values(\""+o.outMchntId+"\",\""+o.cmbcMchntId+"\");",
-            function(err)
-             {if(null!==err)
-               console.log(err);
-             }
-           );
-          o.cmbcMchntId="<b class=\"success\">"+o.cmbcMchntId+"</b>";
-         }
-        res.end(JSON.stringify(o));
-       }
-     );
-   }
- );
-
-app.post('/mchntUpd.html',jsonParser,function(req,res){post(req,res,"mchntUpd",function(o){res.end(JSON.stringify(o));});});
-app.post('/queryMchnt.html',jsonParser,function(req,res){post(req,res,"queryMchnt",function(o){res.end(JSON.stringify(o));});});
-app.post('/chnlAdd.html',jsonParser,function(req,res){post(req,res,"chnlAdd",function(o){res.end(JSON.stringify(o));});});
-app.post('/chnlUpd.html',jsonParser,function(req,res){post(req,res,"chnlUpd",function(o){res.end(JSON.stringify(o));});});
-app.post('/queryChnl.html',jsonParser,function(req,res){post(req,res,"queryChnl",function(o){res.end(JSON.stringify(o));});});
+app.post('/mchntAdd.html',jsonParser,function(req,res){post(req,res,"mchntAdd");});
+app.post('/mchntUpd.html',jsonParser,function(req,res){post(req,res,"mchntUpd");});
+app.post('/queryMchnt.html',jsonParser,function(req,res){post(req,res,"queryMchnt");});
+app.post('/chnlAdd.html',jsonParser,function(req,res){post(req,res,"chnlAdd");});
+app.post('/chnlUpd.html',jsonParser,function(req,res){post(req,res,"chnlUpd");});
+app.post('/queryChnl.html',jsonParser,function(req,res){post(req,res,"queryChnl");});
 
 app.post
  ('/upload.html',
@@ -376,7 +366,7 @@ app.post
                       request.post
                        ({"url":url,"formData":form},
                         function(e,cmbc,download)
-                         {decode(p,res,e,cmbc,download,function(o){res.end(JSON.stringify(o));});
+                         {decode(p,res,"upload",e,cmbc,download);
                          }
                        );
                      }
