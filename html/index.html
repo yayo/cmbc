@@ -1,5 +1,26 @@
 <html>
 <head>
+<script type="text/javascript">
+window.onload=function()
+ {
+  if("undefined"===typeof(window.Storage))
+   {alert("Web_Storage NOT supported!");
+   }
+  else
+   {
+   }
+ }
+
+function cal()
+ {var i;
+  for(i=0;i<localStorage.length;i++)
+   {var name=localStorage.key(i);
+    var value=localStorage.getItem(name);
+   }
+  document.getElementById("cal").value=i;
+ }
+
+</script>
 </head>
 <body>
 <ul>
@@ -11,7 +32,8 @@
 <li><a href="/queryChnl.html">支付通道信息查询</a></li>
 <li><a href="/upload.html">电子资料信息上传</a></li>
 </ul>
-
+<input type="button" onclick="localStorage.clear();" value="清除缓存">
+<input type="button" id="cal" onclick="cal();" value="缓存计数">
 <ol>
 TODO:
 <li>表单提交校验</li>
@@ -30,4 +52,3 @@ TODO:
 
 </body>
 </html>
-

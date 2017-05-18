@@ -226,101 +226,107 @@ function edType_file_append(i)
  }
 
 window.onload=function()
- {document.f.txnSeq.value=serial();
-  document.f.platformId.value=platformId;
-  var r1=[[undefined,1],[undefined,1]];
-  var t=document.getElementById("t");
-  var i=window.location.pathname.substring(1);
-  i=cmbc_interface[i.substring(0,i.length-5)];
-  document.title=i;
-  t.rows[0].cells[0].innerText=i;
-  var r;
-  for(i=0;r=t.rows[i];i++)
-   {if(undefined===r.cells[1])
-     {if(1!=r.cells[0].rowSpan)
-       {if(undefined===r1[0][0])
-         r1[0][0]=i;
-        else
-         r1[1][0]=i;
-       }
-     }
-    else
-     {var n=r.cells[1].firstChild.name;
-      if(c2n.hasOwnProperty(n))
-       {r.cells[0].innerText=c2n[n][0];
-        if(0===c2n[n][2])
-         {r.cells[1].firstChild.classList.add("option");
-          //r.cells[2].innerText="";
-         }
-        else if(1===c2n[n][2])
-         {r.cells[1].firstChild.classList.add("mandatory");
-          //r.cells[2].innerText="*";
-         }
-        else if(2===c2n[n][2])
-         {r.cells[1].firstChild.classList.add("oneintwo");
-          //r.cells[2].innerText=?;
-         }
-        r.cells[1].firstChild.disabled=(0!==c2n[n][3]);
-        r.cells[1].firstChild.readOnly=(0!==c2n[n][4]);
-        if(0!==c2n[n][5])
-         {r.style.display="none";
-         }
-        else
-         {r.style.display="auto";
-          if(undefined===r1[1][0])
-           r1[0][1]++;
+ {if("undefined"===typeof(window.Storage))
+   {alert("Web_Storage NOT supported!");
+   }
+  else
+   {document.f.txnSeq.value=serial();
+    document.f.platformId.value=platformId;
+    var r1=[[undefined,1],[undefined,1]];
+    var t=document.getElementById("t");
+    var i=window.location.pathname.substring(1);
+    i=cmbc_interface[i.substring(0,i.length-5)];
+    document.title=i;
+    t.rows[0].cells[0].innerText=i;
+    var r;
+    for(i=0;r=t.rows[i];i++)
+     {if(undefined===r.cells[1])
+       {if(1!=r.cells[0].rowSpan)
+         {if(undefined===r1[0][0])
+           r1[0][0]=i;
           else
-           r1[1][1]++;
+           r1[1][0]=i;
          }
        }
       else
-       {r.cells[0].innerText="";
+       {var n=r.cells[1].firstChild.name;
+        if(c2n.hasOwnProperty(n))
+         {r.cells[0].innerText=c2n[n][0];
+          if(0===c2n[n][2])
+           {r.cells[1].firstChild.classList.add("option");
+            //r.cells[2].innerText="";
+           }
+          else if(1===c2n[n][2])
+           {r.cells[1].firstChild.classList.add("mandatory");
+            //r.cells[2].innerText="*";
+           }
+          else if(2===c2n[n][2])
+           {r.cells[1].firstChild.classList.add("oneintwo");
+            //r.cells[2].innerText=?;
+           }
+          r.cells[1].firstChild.disabled=(0!==c2n[n][3]);
+          r.cells[1].firstChild.readOnly=(0!==c2n[n][4]);
+          if(0!==c2n[n][5])
+           {r.style.display="none";
+           }
+          else
+           {r.style.display="auto";
+            if(undefined===r1[1][0])
+             r1[0][1]++;
+            else
+             r1[1][1]++;
+           }
+         }
+        else
+         {r.cells[0].innerText="";
+         }
        }
+     }
+    t.rows[r1[0][0]].cells[0].rowSpan=r1[0][1];
+    t.rows[r1[1][0]].cells[0].rowSpan=r1[1][1];
+  
+    if("/upload.html"===window.location.pathname)
+     {for(i in edType)
+       {var r;
+        r=t.insertRow(document.getElementById("b").parentNode.parentNode.rowIndex);
+        var v;
+        v=document.createElement("td");
+        v["id"]="f"+i;
+        v["rowSpan"]=1;
+        v.appendChild(document.createTextNode(edType[i][0]));
+        r.appendChild(v);
+        for(var l=0;l<edType[i][1];l++)
+         {edType_file_append(i);
+         }
+       }
+     }
+  
+    foreach_input
+     (function(n)
+       {if(c2n.hasOwnProperty(n.name) && 1===c2n[n.name][1])
+         {//i=document.cookie.replace((new RegExp("(?:(?:^|.*;\\s*)"+n.name+"\\s*\\=\\s*([^;]*).*$)|^.*$")),"$1");
+          i=localStorage.getItem(n.name);
+          if(null!==i&&""!==i)
+           n.value=i;
+         }
+        if("outMchntId"===n.name)
+         { //out2cmbc(n);
+         }
+       },
+      function(n)
+       {n.addEventListener("change",file_change);
+       }
+     );
+    if("/mchntAdd.html"===window.location.pathname)
+     {var area_1=document.getElementsByName("area_1")[0];
+      for(i in area2code)
+       {var o=new Option(i,i);
+       area_1.appendChild(o);
+       }
+      area_1.selectedIndex=0;
+      s(1,area_1,area2code);
      }
    }
-  t.rows[r1[0][0]].cells[0].rowSpan=r1[0][1];
-  t.rows[r1[1][0]].cells[0].rowSpan=r1[1][1];
-
-  if("/upload.html"===window.location.pathname)
-   {for(i in edType)
-     {var r;
-      r=t.insertRow(document.getElementById("b").parentNode.parentNode.rowIndex);
-      var v;
-      v=document.createElement("td");
-      v["id"]="f"+i;
-      v["rowSpan"]=1;
-      v.appendChild(document.createTextNode(edType[i][0]));
-      r.appendChild(v);
-      for(var l=0;l<edType[i][1];l++)
-       {edType_file_append(i);
-       }
-     }
-   }
-
-  foreach_input
-   (function(n)
-     {if(c2n.hasOwnProperty(n.name) && 1===c2n[n.name][1])
-       {i=document.cookie.replace((new RegExp("(?:(?:^|.*;\\s*)"+n.name+"\\s*\\=\\s*([^;]*).*$)|^.*$")),"$1");
-        if(""!==i)
-         n.value=i;
-       }
-      if("outMchntId"===n.name)
-       { //out2cmbc(n);
-       }
-     },
-    function(n)
-     {n.addEventListener("change",file_change);
-     }
-   );
-  if("/mchntAdd.html"===window.location.pathname)
-  {var area_1=document.getElementsByName("area_1")[0];
-   for(i in area2code)
-    {var o=new Option(i,i);
-     area_1.appendChild(o);
-    }
-   area_1.selectedIndex=0;
-   s(1,area_1,area2code);
-  }
  }
 
 function f2o()
@@ -340,8 +346,35 @@ function f2o()
   return r;
  }
 
+function Colorful(o)
+ {
+  if(o.hasOwnProperty("respCode"))
+   {if("0000"!==o.respCode)
+     {o.respCode="<b class=\"failed\">"+o.respCode+"</b>";
+     }
+    else
+     {o.respCode="<b class=\"success\">"+o.respCode+"</b>";
+     }
+   }
+  if(o.hasOwnProperty("errorMsg"))
+   {if("执行成功"!==o.errorMsg)
+     {o.errorMsg="<b class=\"failed\">"+o.errorMsg+"</b>";
+     }
+    else
+     {o.errorMsg="<b class=\"success\">"+o.errorMsg+"</b>";
+     }
+   }
+  if(o.hasOwnProperty("cmbcMchntId")&&""!==o.cmbcMchntId)
+   {o.cmbcMchntId="<b class=\"success\">"+o.cmbcMchntId+"</b>";
+   }
+  if(o.hasOwnProperty("cmbcSignId")&&""!==o.cmbcSignId)
+   {o.cmbcSignId="<b class=\"success\">"+o.cmbcSignId+"</b>";
+   }
+ }
+
 function o2t(o)
  {o=JSON.parse(o);
+  Colorful(o);
   var t=document.createElement("table");
   for(i in o)
    {var r=document.createElement("tr");
@@ -359,7 +392,9 @@ function o2t(o)
     if(c2n.hasOwnProperty(i) && 1===c2n[i][1])
      {v=v.innerText;
       if(""!==v)
-       document.cookie=i+"="+v+"; Path=/";
+       {//document.cookie=i+"="+v+"; Path=/";
+        localStorage.setItem(i,v);
+       }
      }
    }
   t.border="true";

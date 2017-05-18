@@ -139,31 +139,6 @@ app.get
   }
  );
 
-function Colorful(o)
- {if(o.hasOwnProperty("respCode"))
-   {if("0000"!==o.respCode)
-     {o.respCode="<b class=\"failed\">"+o.respCode+"</b>";
-     }
-    else
-     {o.respCode="<b class=\"success\">"+o.respCode+"</b>";
-     }
-   }
-  if(o.hasOwnProperty("errorMsg"))
-   {if("执行成功"!==o.errorMsg)
-     {o.errorMsg="<b class=\"failed\">"+o.errorMsg+"</b>";
-     }
-    else
-     {o.errorMsg="<b class=\"success\">"+o.errorMsg+"</b>";
-     }
-   }
-  if(o.hasOwnProperty("cmbcMchntId")&&""!==o.cmbcMchntId)
-   {o.cmbcMchntId="<b class=\"success\">"+o.cmbcMchntId+"</b>";
-   }
-  if(o.hasOwnProperty("cmbcSignId")&&""!==o.cmbcSignId)
-   {o.cmbcSignId="<b class=\"success\">"+o.cmbcSignId+"</b>";
-   }
- }
-
 function encode(res,i)
  {
   if(!i.hasOwnProperty("txnSeq")||!i.hasOwnProperty("platformId")||""===i.txnSeq||i.platformId!==config.credentials.my.platformId)
@@ -238,7 +213,6 @@ function decode(p,res,action,err,cmbc,download)
                    );
                  }
                }
-              Colorful(cmbc);
               res.end(JSON.stringify(cmbc));
              }
            }
