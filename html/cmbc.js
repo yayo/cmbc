@@ -231,7 +231,7 @@ window.onload=function()
    }
   else
    {document.f.txnSeq.value=serial();
-    document.f.platformId.value=platformId;
+    document.f.platformId.value=client.platformId;
     var r1=[[undefined,1],[undefined,1]];
     var t=document.getElementById("t");
     var i=window.location.pathname.substring(1);

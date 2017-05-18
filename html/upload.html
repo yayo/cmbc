@@ -51,8 +51,7 @@ function upload()
    {var b0=http_start();
     document.getElementById("o").innerHTML="";
     var c=f2o();
-    var ts=JSON.parse(JSON.stringify(submits));
-    //console.log(JSON.stringify(ts));
+    var ts=Object.assign({},submits);
     next(b0,ts,c);
     return(false);
    }

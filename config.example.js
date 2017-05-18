@@ -6,15 +6,18 @@ exports.server=
   cmbc:"http://wxpay.cmbc.com.cn/mobilePlatform/lcbpService/"
  };
 
+exports.client=
+ {platformId: "A00002016120000000294",
+ };
+
 exports.credentials=
  {cmbc: __dirname+"/cert/cmbcTest.cer",
   my:
-   {platformId: "A00002016120000000294",
-    key:
+   {key:
      {file: __dirname+"/cert/cust0001.sm2",
-      password: "123123"
+      password: "123123",
      },
-    cert: __dirname+"/cert/cust0001.cer"
+    cert: __dirname+"/cert/cust0001.cer",
    }
  };
 

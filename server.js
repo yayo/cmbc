@@ -1,5 +1,6 @@
 
-var config=require("./config");
+var config_file="./config";
+var config=require(config_file);
 var express=require("express");
 var bodyParser=require("body-parser");
 var formidable=require("formidable")
@@ -12,6 +13,7 @@ var sqlite=require("sqlite3");
 
 var app=express();
 app.disable("x-powered-by");
+var config_file_mtime=(new Date(fs.statSync(__dirname+"/"+config_file+".js")["mtime"])).toGMTString();
 var jsonParser=bodyParser.json({extended: false})
 java.classpath.push(__dirname+"/SADK-CMBC-3.1.0.8.jar");
 
@@ -59,11 +61,6 @@ app.get
   }
  );
 app.get
- ("/offline.js",function(req,res)
-  {res.sendFile(__dirname+"/html/"+"offline.js");
-  }
- );
-app.get
  ("/spark-md5.js",function(req,res)
   {res.setHeader('Content-Encoding','gzip');
    res.sendFile(__dirname+"/html/"+"spark-md5.js.gz");
@@ -82,7 +79,17 @@ app.get
  );
 app.get
  ("/const.js",function(req,res)
-  {res.end("var platformId=\""+config.credentials.my.platformId+"\";");
+  {res.setHeader("Cache-Control","public, max-age=0");
+   res.setHeader("Last-Modified",config_file_mtime);
+   if(req.headers.hasOwnProperty("if-modified-since")&&req.headers["if-modified-since"]===config_file_mtime)
+    res.sendStatus(304);
+   else
+    res.end("var client="+JSON.stringify(config.client)+";");
+  }
+ );
+app.get
+ ("/offline.js",function(req,res)
+  {res.end("var client="+JSON.stringify(Object.assign({},config.client,{"platformId":"CAN NOT REACH SERVER"}))+";");
   }
  );
 app.get
@@ -163,7 +170,7 @@ app.get
  );
 
 function encode(res,i)
- {if(!i.hasOwnProperty("txnSeq")||!i.hasOwnProperty("platformId")||""===i.txnSeq||i.platformId!==config.credentials.my.platformId)
+ {if(!i.hasOwnProperty("txnSeq")||!i.hasOwnProperty("platformId")||""===i.txnSeq||i.platformId!==config.client.platformId)
    {res.end(JSON.stringify({"Error":"txnSeq||platformId"}));
     return(undefined);
    }
@@ -175,8 +182,7 @@ function encode(res,i)
       return(undefined);
      }
     else
-     {
-      o=java.callStaticMethodSync("com.yayooo.cmbc.cipher","encrypt",config.credentials.cmbc,JSON.stringify({"sign":s,"body":o}));
+     {o=java.callStaticMethodSync("com.yayooo.cmbc.cipher","encrypt",config.credentials.cmbc,JSON.stringify({"sign":s,"body":o}));
       if(""===o)
        {res.end(JSON.stringify({"Error":"SADK-CMBC::encrypt"}));
         return(undefined);
@@ -196,8 +202,7 @@ function decode(p,res,action,err,cmbc,download)
    {res.end(JSON.stringify({"Error":"statusCode:"+cmbc.statusCode}));
    }
   else
-   {
-    //console.log(download);
+   {console.log(download);
     download=JSON.parse(download);
     if(""===download.businessContext)
      {res.end(JSON.stringify(download));
@@ -208,17 +213,16 @@ function decode(p,res,action,err,cmbc,download)
        {res.end(JSON.stringify({"Error":"decrypt"}));
        }
       else
-       {
-        try
-         {
-          var cmbc=JSON.parse(err);
+       {try
+         {var cmbc=JSON.parse(err);
+          console.log(cmbc.body);
           err=java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.cmbc,cmbc.body,cmbc.sign);
           if(true!==err)
            {res.end(JSON.stringify({"Error":"verify"}));
            }
           else
            {cmbc=JSON.parse(cmbc.body);
-            if(!cmbc.hasOwnProperty("txnSeq")||!cmbc.hasOwnProperty("platformId")||!cmbc.hasOwnProperty("outMchntId")||cmbc.txnSeq!==p.txnSeq||cmbc.outMchntId!==p.outMchntId||cmbc.platformId!==config.credentials.my.platformId)
+            if(!cmbc.hasOwnProperty("txnSeq")||!cmbc.hasOwnProperty("platformId")||!cmbc.hasOwnProperty("outMchntId")||cmbc.txnSeq!==p.txnSeq||cmbc.outMchntId!==p.outMchntId||cmbc.platformId!==config.client.platformId)
              {res.end(JSON.stringify({"Error":"platformId||txnSeq"}));
              }
             else
@@ -246,16 +250,16 @@ function decode(p,res,action,err,cmbc,download)
  }
 
 function post(req,res,action)
- {console.log(req.connection.remoteAddress+":"+req.connection.remotePort);
-  console.log(req.body);
-  var body=encode(res,req.body);
+ {console.log(req.connection.remoteAddress+":"+req.connection.remotePort+" => "+action);
+  req=req.body;
+  console.log(JSON.stringify(req));
+  var body=encode(res,req);
   if(undefined!==body)
    {var url=config.server.cmbc+action+".do";
-   console.log(url);
     request.post
      ({"url":url,"headers":{"Content-Type":"application/json"},"body":JSON.stringify(body)},
       function(e,cmbc,download)
-       {decode(req.body,res,action,e,cmbc,download);
+       {decode(req,res,action,e,cmbc,download);
        }
      );
    }
@@ -278,34 +282,31 @@ app.post
      (req,
       function(err,fields,files)
        {if(undefined===fields["uploadContext"])
-         {
+         {res.end(JSON.stringify({"Error":"NOT_FOUND","value":"uploadContext"}));
          }
         else
          {var p=JSON.parse(fields["uploadContext"]);
           if(undefined===fields["edType"])
-           {
+           {res.end(JSON.stringify({"Error":"NOT_FOUND","value":"edType"}));
            }
           else
-           {
-            if(undefined===fields["sizes"])
-             {
+           {if(undefined===fields["sizes"])
+             {res.end(JSON.stringify({"Error":"NOT_FOUND","value":"sizes"}));
              }
             else
              {var upFileCount=Object.keys(files).length;
               var s=JSON.parse(fields["sizes"]);
               if(Object.keys(s).length!==upFileCount)
-               {
+               {res.end(JSON.stringify({"Error":"COUNT","value":"sizes"}));
                }
               else
-               {
-                if(undefined===fields["md5s"])
-                 {
+               {if(undefined===fields["md5s"])
+                 {res.end(JSON.stringify({"Error":"NOT_FOUND","value":"md5s"}));
                  }
                 else
-                 {
-                  var md5s=JSON.parse(fields["md5s"]);
+                 {var md5s=JSON.parse(fields["md5s"]);
                   if(Object.keys(md5s).length!==upFileCount)
-                   {
+                   {res.end(JSON.stringify({"Error":"COUNT","value":"md5s"}));
                    }
                   else
                    {p["edType"]=fields["edType"];
@@ -318,27 +319,24 @@ app.post
                       var d={};
                       var f;
                       for(f in files)
-                       {
-                        if(!s.hasOwnProperty(f))
-                         {
+                       {if(!s.hasOwnProperty(f))
+                         {res.end(JSON.stringify({"Error":"NOT_INCLUDE","sizes":f}));
                           return;
                          }
                         else
                          {if(files[f].size!==s[f])
-                           {
+                           {res.end(JSON.stringify({"Error":"NOT_MATCH","size":f}));
                             return;
                            }
                           else
-                           {
-                            if(!md5s.hasOwnProperty(f))
-                             {
+                           {if(!md5s.hasOwnProperty(f))
+                             {res.end(JSON.stringify({"Error":"NOT_INCLUDE","md5s":f}));
                               return;
                              }
                             else
-                             {
-                              var h=md5(fs.readFileSync(files[f].path,{flag:'r'}));
+                             {var h=md5(fs.readFileSync(files[f].path,{flag:'r'}));
                               if(h!==md5s[f])
-                               {
+                               {res.end(JSON.stringify({"Error":"NOT_MATCH","md5":f}));
                                 return;
                                }
                               else
