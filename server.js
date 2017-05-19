@@ -1,6 +1,7 @@
 
 var config_file="./config";
 var config=require(config_file);
+const https = require('https');
 var express=require("express");
 var bodyParser=require("body-parser");
 var formidable=require("formidable")
@@ -373,9 +374,13 @@ app.post
    }
  );
 
-var server=app.listen
- (config.server.listen.port,function()
-  {console.log("Listening: %s:%s",server.address().address,server.address().port)
-  }
- );
+https.createServer
+ ({key: fs.readFileSync(config.server.listen.key),
+   cert: fs.readFileSync(config.server.listen.cert),
+   requestCert: true,
+   rejectUnauthorized: true,
+   ca: [fs.readFileSync(config.server.listen.ca)],
+  },
+  app
+ ).listen(config.server.listen.port,config.server.listen.bind);
 

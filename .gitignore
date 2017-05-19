@@ -1,3 +1,8 @@
 /config.js
+/config.product.js
 /node_modules
 /cmbc.db
+/cert/zdprivate.sm2
+/cert/zdpublic.cer
+/cert/CA_Tes1t.topcreate.cn.key
+/cert/Serve1r.key
