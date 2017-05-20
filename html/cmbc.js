@@ -219,6 +219,7 @@ function edType_file_append(i)
       var f=document.createElement("input");
       f["type"]="file";
       f["name"]="file_"+i+"_"+h.rowSpan;
+      f["accept"]=".jpg";
       f.addEventListener("change",file_change);
       v.appendChild(f);
       r.appendChild(v);
@@ -236,6 +237,14 @@ window.onload=function()
    }
   else
    {document.f.txnSeq.value=serial();
+    var source=new EventSource("/push");
+    source.addEventListener
+     ("ping",
+      function(e)
+       {document.f.txnSeq.value=serial();
+       },
+      false
+     );
     document.f.platformId.value=client.platformId;
     var r1=[[undefined,1],[undefined,1]];
     var t=document.getElementById("t");
@@ -452,7 +461,7 @@ function http_processing(b,p,b0,ts,t,next,c)
    {http.upload.onprogress=function(e)
      {if(e.lengthComputable)
        {g.value=(e.loaded/e.total)*100;
-        document.f.b.value="Uploading ... "+edType[t][0]+" : "+g.value+"%";
+        document.f.b.value="Uploading ... "+edType[t][0]+" : "+g.value+"% = "+e.loaded+"/"+e.total;
        }
      };
    }

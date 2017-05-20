@@ -2,6 +2,7 @@ CACHE MANIFEST
 NETWORK:
 /time?t=1495079782
 /out2cmbc
+/push
 CACHE:
 /favicon.ico
 /spark-md5.js

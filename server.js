@@ -1,7 +1,7 @@
 
 var config_file="./config";
 var config=require(config_file);
-const https = require('https');
+const http2=require("spdy");
 var express=require("express");
 var bodyParser=require("body-parser");
 var formidable=require("formidable")
@@ -169,6 +169,24 @@ app.get
   {res.sendFile( __dirname+ "/html/" + "upload.html" );
   }
  );
+app.get
+ ("/push",
+  function(req,res)
+   {res.setHeader("Content-Type","text/event-stream");
+    res.setHeader("Cache-Control","no-cache");
+    res.setHeader("Connection","keep-alive");
+    res.status(200);
+    res.write("retry:60000\n");
+    var timer=setInterval
+     (function()
+       {res.write("event: ping\n");
+        res.write("data: "+(new Date()).getTime()+"\n\n");
+       },
+      1000
+     );
+    req.connection.addListener("close",function(){clearInterval(timer);},false);
+   }
+ );
 
 function encode(res,i)
  {if(!i.hasOwnProperty("txnSeq")||!i.hasOwnProperty("platformId")||""===i.txnSeq||i.platformId!==config.client.platformId)
@@ -313,7 +331,7 @@ app.post
                    {p["edType"]=fields["edType"];
                     p["upFileCount"]=""+upFileCount;
                     p["md5s"]=md5s;
-                    //console.log(JSON.stringify(p));
+                    console.log(JSON.stringify(p));
                     var u=encode(res,p);
                     if(undefined!==u)
                      {var form={"uploadContext":JSON.stringify(u)};
@@ -374,7 +392,8 @@ app.post
    }
  );
 
-https.createServer
+//const http = require("http");
+http2.createServer
  ({key: fs.readFileSync(config.server.listen.key),
    cert: fs.readFileSync(config.server.listen.cert),
    requestCert: true,
