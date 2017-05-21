@@ -2,6 +2,7 @@
 jdk
 nodejs
 npm
+npm install spdy
 npm install express
 npm install body-parser
 npm install formidable

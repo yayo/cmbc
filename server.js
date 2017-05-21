@@ -47,7 +47,7 @@ app.get
  ("/time",function(req,res)
   {res.setHeader("Content-Type","text/plain; charset=UTF-8");
    res.setHeader("Cache-Control","no-cache");
-   res.end((new Date()).toISOString()+"\r\n"+req.connection.localAddress+":"+req.connection.localPort+"\r\n"+req.headers["host"]+"\r\n"+req.connection.remoteAddress+":"+req.connection.remotePort+"\r\n"+req.headers["user-agent"]);
+   res.end((new Date()).toISOString()+"\r\n"+req.connection._spdyState.parent.localAddress+":"+req.connection._spdyState.parent.localPort+"\r\n"+req.headers["host"]+"\r\n"+req.connection.remoteAddress+":"+req.connection.remotePort+"\r\n"+req.headers["user-agent"]);
   }
  );
 app.get
@@ -63,19 +63,16 @@ app.get
  );
 app.get
  ("/spark-md5.js",function(req,res)
-  {res.setHeader('Content-Encoding','gzip');
-   res.sendFile(__dirname+"/html/"+"spark-md5.js.gz");
+  {res.setHeader("Content-Encoding","gzip");
+   res.setHeader("Content-Type","application/javascript; charset=UTF-8");
+   res.sendFile(__dirname+ "/html/"+"spark-md5.js.gz" );
   }
  );
 app.get
  ("/area2code20170310_1471429.js",function(req,res)
   {res.setHeader("Content-Encoding","gzip");
-   res.sendFile(__dirname+"/html/"+"area2code20170310_1471429.js.gz");
-  }
- );
-app.get
- ("/cmbc.css",function(req,res)
-  {res.sendFile(__dirname+"/html/"+"cmbc.css");
+   res.setHeader("Content-Type","application/javascript; charset=UTF-8");
+   res.sendFile(__dirname+ "/html/"+"area2code20170310_1471429.js.gz" );
   }
  );
 app.get
@@ -93,11 +90,26 @@ app.get
   {res.end("var client="+JSON.stringify(Object.assign({},config.client,{"platformId":"CAN NOT REACH SERVER"}))+";");
   }
  );
-app.get
- ("/cmbc.js",function(req,res)
-  {res.sendFile(__dirname+"/html/"+"cmbc.js");
-  }
- );
+function resources(res)
+ {var s1=res.push
+   ("/cmbc.css",
+    {request:{"accept":"*/*"},
+     response:{"content-type":"text/css; charset=UTF-8"}
+    }
+   );
+  s1.on("error",function(){});
+  // fs.createReadStream(__dirname+"/html/"+"cmbc.css").pipe(s1); /* CRASHED */
+  s1.end(fs.readFileSync(__dirname+"/html/"+"cmbc.css")); /* OK */
+  var s2=res.push
+   ("/cmbc.js",
+    {request:{"accept":"*/*"},
+     response:{"content-type":"application/javascript; charset=UTF-8"}
+    } 
+   );
+  s2.on("error",function(){});
+  // fs.createReadStream(__dirname+"/html/"+"cmbc.css").pipe(s2); /* CRASHED */
+  s2.end(fs.readFileSync(__dirname+"/html/"+"cmbc.js")); /* OK */
+ }
 app.get
  ("/out2cmbc",function(req,res)
   {if(undefined===req.query["out"])
@@ -136,37 +148,44 @@ app.get
  );
 app.get
  ("/mchntAdd.html",function(req,res)
-  {res.sendFile( __dirname+ "/html/" + "mchntAdd.html" );
+  {resources(res);
+   res.sendFile(__dirname+ "/html/"+"mchntAdd.html" );
   }
  );
 app.get
  ("/mchntUpd.html",function(req,res)
-  {res.sendFile( __dirname+ "/html/" + "mchntUpd.html" );
+  {resources(res);
+   res.sendFile(__dirname+ "/html/"+"mchntUpd.html" );
   }
  );
 app.get
  ("/queryMchnt.html",function(req,res)
-  {res.sendFile( __dirname+ "/html/" + "queryMchnt.html" );
+  {resources(res);
+   res.sendFile(__dirname+ "/html/"+"queryMchnt.html" );
   }
  );
 app.get
  ("/chnlAdd.html",function(req,res)
-  {res.sendFile( __dirname+ "/html/" + "chnlAdd.html" );
+  {resources(res);
+   res.sendFile(__dirname+ "/html/"+"chnlAdd.html" );
   }
  );
 app.get
  ("/chnlUpd.html",function(req,res)
-  {res.sendFile( __dirname+ "/html/" + "chnlUpd.html" );
+  {resources(res);
+   res.sendFile(__dirname+ "/html/"+"chnlUpd.html" );
   }
  );
 app.get
  ("/queryChnl.html",function(req,res)
-  {res.sendFile( __dirname+ "/html/" + "queryChnl.html" );
+  {resources(res);
+   res.sendFile(__dirname+ "/html/"+"queryChnl.html" );
   }
  );
 app.get
  ("/upload.html",function(req,res)
-  {res.sendFile( __dirname+ "/html/" + "upload.html" );
+  {resources(res);
+   res.sendFile(__dirname+ "/html/"+"upload.html" );
   }
  );
 app.get
@@ -177,14 +196,14 @@ app.get
     res.setHeader("Connection","keep-alive");
     res.status(200);
     res.write("retry:60000\n");
-    var timer=setInterval
+    var t=setInterval
      (function()
        {res.write("event: ping\n");
         res.write("data: "+(new Date()).getTime()+"\n\n");
        },
       1000
      );
-    req.connection.addListener("close",function(){clearInterval(timer);},false);
+    req.connection.addListener("close",function(){clearInterval(t);},false);
    }
  );
 
@@ -394,7 +413,9 @@ app.post
 
 //const http = require("http");
 http2.createServer
- ({key: fs.readFileSync(config.server.listen.key),
+ ({protocols: ["h2"],
+   plain: false,
+   key: fs.readFileSync(config.server.listen.key),
    cert: fs.readFileSync(config.server.listen.cert),
    requestCert: true,
    rejectUnauthorized: true,

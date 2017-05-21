@@ -237,20 +237,20 @@ window.onload=function()
    }
   else
    {document.f.txnSeq.value=serial();
-    var source=new EventSource("/push");
-    source.addEventListener
+    var t=new EventSource("/push");
+    t.addEventListener
      ("ping",
       function(e)
-       {document.f.txnSeq.value=serial();
+       {document.f.txnSeq.value=e.data.substring(0,e.data.length-3);
        },
       false
      );
     document.f.platformId.value=client.platformId;
     var r1=[[undefined,1],[undefined,1]];
-    var t=document.getElementById("t");
     var i=window.location.pathname.substring(1);
     i=cmbc_interface[i.substring(0,i.length-5)];
     document.title=i;
+    t=document.getElementById("t");
     t.rows[0].cells[0].innerText=i;
     var r;
     for(i=0;r=t.rows[i];i++)
