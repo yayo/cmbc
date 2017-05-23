@@ -6,6 +6,7 @@ NETWORK:
 CACHE:
 /favicon.ico
 /spark-md5.js
+/qrcode.min.js
 /area2code20170310_1471429.js
 /cmbc.css
 /cmbc.js

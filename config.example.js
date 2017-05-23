@@ -2,16 +2,17 @@
 exports.server=
  {listen:
    {bind: "0.0.0.0",
-    port:"443",
+    port: "443",
     key: __dirname+"/"+"cert/Serve1r.key",
     cert: __dirname+"/"+"cert/Serve1r.crt",
     ca: __dirname+"/"+"cert/CA_Tes1t.topcreate.cn.crt",
    },
-  cmbc:"http://wxpay.cmbc.com.cn/mobilePlatform/lcbpService/",
+  cmbc: "http://wxpay.cmbc.com.cn/mobilePlatform/lcbpService/",
  };
 
 exports.client=
  {platformId: "A00002016120000000294",
+  qrcode: "https://wxpay.cmbc.com.cn/mobilePlatform/appQrcodeserver/qrcode.do",
  };
 
 exports.credentials=

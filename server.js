@@ -69,6 +69,14 @@ app.get
   }
  );
 app.get
+ ("/qrcode.min.js",function(req,res)
+  {res.setHeader("Content-Encoding","gzip");
+   res.setHeader("Content-Type","application/javascript; charset=UTF-8");
+   /* gzip -9c node_modules/qrcode/build/qrcode.min.js > html/qrcode.min.js.gz */
+   res.sendFile(__dirname+ "/html/"+"qrcode.min.js.gz" );
+  }
+ );
+app.get
  ("/area2code20170310_1471429.js",function(req,res)
   {res.setHeader("Content-Encoding","gzip");
    res.setHeader("Content-Type","application/javascript; charset=UTF-8");
@@ -232,47 +240,54 @@ function encode(res,i)
    }
  }
 
-function decode(p,res,action,err,cmbc,download)
- {if(err)
-   {res.end(JSON.stringify(err));
+function decode(i,res,action,e,cmbc,body)
+ {if(e)
+   {res.end(JSON.stringify(e));
    }
   else if(cmbc.statusCode!=200)
    {res.end(JSON.stringify({"Error":"statusCode:"+cmbc.statusCode}));
    }
   else
-   {console.log(download);
-    download=JSON.parse(download);
-    if(""===download.businessContext)
-     {res.end(JSON.stringify(download));
+   {console.log(body);
+    body=JSON.parse(body);
+    if(""===body.businessContext)
+     {res.end(JSON.stringify(body));
      }
     else
-     {err=java.callStaticMethodSync("com.yayooo.cmbc.cipher","decrypt",config.credentials.my.key.file,config.credentials.my.key.password,download.businessContext);
-      if(""===err)
+     {e=java.callStaticMethodSync("com.yayooo.cmbc.cipher","decrypt",config.credentials.my.key.file,config.credentials.my.key.password,body.businessContext);
+      if(""===e)
        {res.end(JSON.stringify({"Error":"decrypt"}));
        }
       else
        {try
-         {var cmbc=JSON.parse(err);
+         {var cmbc=JSON.parse(e);
           console.log(cmbc.body);
-          err=java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.cmbc,cmbc.body,cmbc.sign);
-          if(true!==err)
+          e=java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.cmbc,cmbc.body,cmbc.sign);
+          if(true!==e)
            {res.end(JSON.stringify({"Error":"verify"}));
            }
           else
            {cmbc=JSON.parse(cmbc.body);
-            if(!cmbc.hasOwnProperty("txnSeq")||!cmbc.hasOwnProperty("platformId")||!cmbc.hasOwnProperty("outMchntId")||cmbc.txnSeq!==p.txnSeq||cmbc.outMchntId!==p.outMchntId||cmbc.platformId!==config.client.platformId)
-             {res.end(JSON.stringify({"Error":"platformId||txnSeq"}));
+            if(!cmbc.hasOwnProperty("txnSeq")||!cmbc.hasOwnProperty("platformId")||!cmbc.hasOwnProperty("outMchntId")||cmbc.txnSeq!==i.txnSeq||cmbc.outMchntId!==i.outMchntId||cmbc.platformId!==config.client.platformId)
+             {res.end(JSON.stringify({"Error":"platformId||txnSeq||outMchntId"}));
              }
             else
-             {if(cmbc.hasOwnProperty("cmbcMchntId")&&""!==cmbc.cmbcMchntId)
-               {if("mchntAdd"===action)
-                 {db.exec
-                   ("INSERT INTO out2cmbc values(\""+cmbc.outMchntId+"\",\""+cmbc.cmbcMchntId+"\");",
-                    function(err)
-                     {if(null!==err)
-                       console.log(err);
-                     }
-                   );
+             {if(cmbc.hasOwnProperty("respCode")&&"0000"===cmbc.respCode)
+               {if(cmbc.hasOwnProperty("cmbcMchntId")&&""!==cmbc.cmbcMchntId)
+                 {if("mchntAdd"===action)
+                   {db.exec
+                     ("INSERT INTO out2cmbc values(\""+cmbc.outMchntId+"\",\""+cmbc.cmbcMchntId+"\");",
+                      function(e)
+                       {if(null!==e)
+                         console.log(e);
+                       }
+                     );
+                   }
+                  e="&merchantNum="+cmbc.cmbcMchntId+"&platformId="+config.client.platformId;
+                  i=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,e);
+                  if(""!==i&&true===java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.my.cert,e,i))
+                   {cmbc["qrcode"]=i;
+                   }
                  }
                }
               res.end(JSON.stringify(cmbc));
@@ -280,7 +295,7 @@ function decode(p,res,action,err,cmbc,download)
            }
          }
         catch(e)
-         {res.end(JSON.stringify({"Error":"JSON.parse","value":err}));
+         {res.end(JSON.stringify({"Error":"JSON.parse","value":e}));
          }
        }
      }
@@ -296,8 +311,8 @@ function post(req,res,action)
    {var url=config.server.cmbc+action+".do";
     request.post
      ({"url":url,"headers":{"Content-Type":"application/json"},"body":JSON.stringify(body)},
-      function(e,cmbc,download)
-       {decode(req,res,action,e,cmbc,download);
+      function(e,cmbc_res,cmbc_body)
+       {decode(req,res,action,e,cmbc_res,cmbc_body);
        }
      );
    }
@@ -395,8 +410,8 @@ app.post
                       var url=config.server.cmbc+"upload"+".do";
                       request.post
                        ({"url":url,"formData":form},
-                        function(e,cmbc,download)
-                         {decode(p,res,"upload",e,cmbc,download);
+                        function(e,cmbc_res,cmbc_body)
+                         {decode(p,res,"upload",e,cmbc_res,cmbc_body);
                          }
                        );
                      }
@@ -411,7 +426,6 @@ app.post
    }
  );
 
-//const http = require("http");
 http2.createServer
  ({protocols: ["h2"],
    plain: false,

@@ -2,6 +2,7 @@
 <head>
 <link rel="stylesheet" type="text/css" href="cmbc.css">
 <script type="text/javascript" src="const.js"></script>
+<script type="text/javascript" src="qrcode.min.js"></script>
 <script type="text/javascript" src="cmbc.js"></script>
 </head>
 <body>
@@ -19,9 +20,9 @@
 <tr><td></td><td><select name="apiCode" maxlength=4><option value="0005" selected>微信</option><option value="0007">支付宝</option><option value="0008">QQ钱包</option></select></td><td>0005：微信；0007：支付宝；0008：QQ钱包</td></tr>
 <tr><td></td><td><input type="text" name="fixFeeRate" maxlength=100 value=""></td><td>0.50%：0.50小数点后精确到2位</td></tr>
 <tr><td></td><td><input type="text" name="specFeeRate" maxlength=100 value=""></td><td>具体说明请见表后</td></tr>
-<tr><td></td><td><input type="text" name="dayLimit" maxlength=12 value=""></td><td>单位：分</td></tr>
-<tr><td></td><td><input type="text" name="monthLimit" maxlength=12 value=""></td><td>单位：分</td></tr>
-<tr><td></td><td><select name="acctType" maxlength=1><option value=1>对私</option><option value=2 selected>对公</option></select><td>1-- 私，2-对公</td></tr>
+<tr><td></td><td><input type="text" name="dayLimit" maxlength=12 value=""></td><td>单位：万元</td></tr>
+<tr><td></td><td><input type="text" name="monthLimit" maxlength=12 value=""></td><td>单位：万元</td></tr>
+<tr><td></td><td><select name="acctType" maxlength=1><option value=1>对私</option><option value=2 selected>对公</option></select><td>1-对私，2-对公</td></tr>
 <tr><td></td><td><input type="text" name="pbcBankId" maxlength=12 value=""></td><td>大小额行号，非民生账户必填</td></tr>
 <tr><td></td><td><input type="text" name="acctName" maxlength=200 value=""></td><td></td></tr>
 <tr><td></td><td><input type="text" name="account" maxlength=32 value=""></td><td></td></tr>
