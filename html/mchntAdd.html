@@ -74,11 +74,12 @@ function s(m,e,a)
 <tr><td></td><td><input type="text" name="contactName" maxlength=20 value=""></td><td></td></tr>
 <tr><td></td><td><input type="text" name="telephone" maxlength=11 value=""></td><td></td></tr>
 <tr><td></td><td><input type="text" name="servTel" maxlength=11 value=""></td><td></td></tr>
-<tr><td></td><td><input type="text" name="identification" maxlength=20></td><td>手机号+MAC</td></tr>
 <tr><td></td><td><select name="autoSettle" maxlength=1><option value=1 selected>自动结算</option><option value=2>手工提现</option></select><td>1-自动结算，2-手工提现</td></tr>
+<tr><td></td><td><input type="text" name="identification" maxlength=20></td><td>手机号+MAC</td></tr>
 <tr><td></td><td><input type="text" name="remark" maxlength=100></td><td></td></tr>
 <tr><td></td><td><input type="text" name="message" maxlength=0></td><td></td></tr>
-<tr><td colspan=4 align="center" ><input id="b" type="submit" value="Submit"></td></tr>
+<tr><td colspan=4 align="center" ><input type="button" value="Reset" onclick="reset_all();"></td></tr>
+<tr><td colspan=4 align="center" ><input id="b" type="submit" value="Submit" onclick="post(f2o(),window.location.pathname,this);"></td></tr>
 <tr><td colspan=4 align="center"><ol id="o"><b class="mandatory">必</b>填；<b class="option">选</b>填</ol></td></tr>
 </table>
 </form>

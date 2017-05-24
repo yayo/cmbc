@@ -1,6 +1,6 @@
 CACHE MANIFEST
 NETWORK:
-/time?t=1495079782
+/time?t=1495079784
 /out2cmbc
 /push
 CACHE:
@@ -15,8 +15,6 @@ CACHE:
 /mchntUpd.html
 /chnlAdd.html
 /chnlUpd.html
-/queryChnl.html
-/queryMchnt.html
 /upload.html
 FALLBACK:
 /const.js /offline.js

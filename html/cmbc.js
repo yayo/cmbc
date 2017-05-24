@@ -34,12 +34,13 @@ var c2n=
   "mchntFullName":["公司全称",1,1,0,0,0],
   "parentMchntId":["父商户",0,0,0,0,0],
   "devType":["拓展模式",0,1,0,0,0],
-  "acdCode":["区域代码",0,1,1,1,0],
   "province":["省份",0,1,0,0,0],
   "area_1":["省份",0,1,0,0,0],
   "city":["城市",0,1,0,0,0],
   "area_2":["城市",0,1,0,0,0],
   "area_3":["区县",0,1,0,0,0],
+  "acdCode":["区域代码",0,1,1,1,0],
+  "area_o":["区域代码",0,1,1,1,0],
   "address":["地址",1,1,0,0,0],
   "isCert":["是否持证",1,1,0,0,0],
   "licId":["营业执照号",1,1,0,0,0],
@@ -127,6 +128,23 @@ function foreach_input(i,f)
        i(n);
      }
    }
+ }
+
+function ro(m)
+ {if(0!==c2n[m][3]||0!==c2n[m][4]||0!==c2n[m][5]||"outMchntId"===m||"cmbcMchntId"===m||"apiCode"===m) return(2);
+  else if("operId"===m||"acctType"===m) return(1);
+  else return(0);
+ }
+
+function reset_all()
+ {foreach_input
+   (function(n)
+     {var m=n.name;
+      if(0===ro(m)) n.value="";
+      return;
+     },
+    function(){}
+   );
  }
 
 var md5s={};
@@ -441,15 +459,21 @@ function o2t(o)
        }
      }
     else
-     {v.appendChild(document.createTextNode(i));
-      r.appendChild(v);
-      v=document.createElement("td");
-      v.appendChild(document.createTextNode(c2n.hasOwnProperty(i)?c2n[i][0]:""));
-      r.appendChild(v);
-      v=document.createElement("td");
-      v.innerHTML=Colorful(i,(o[i]=transform("from",i,o[i])));
-      r.appendChild(v);
-      t.appendChild(r);
+     {o[i]=transform("from",i,o[i]);
+      var e;
+      if(undefined!==(e=document.getElementsByName(i)[0])&&null!==e&&2!==ro(i)&&(""===e.value||o[i]===e.value))
+       e.value=o[i];
+      else
+       {v.appendChild(document.createTextNode(i));
+        r.appendChild(v);
+        v=document.createElement("td");
+        v.appendChild(document.createTextNode(c2n.hasOwnProperty(i)?c2n[i][0]:""));
+        r.appendChild(v);
+        v=document.createElement("td");
+        v.innerHTML=Colorful(i,(o[i]));
+        r.appendChild(v);
+        t.appendChild(r);
+       }
       if(c2n.hasOwnProperty(i) && 0<c2n[i][1])
        {v=o[i];
         if(""!==v)
@@ -472,15 +496,15 @@ function o2t(o)
   return(t);
  }
 
-function http_start()
- {var b0=document.f.b.value;
-  document.f.b.disabled=true;
-  document.f.b.value="Processing";
+function http_start(n)
+ {var b0=n.value;
+  n.disabled=true;
+  n.value="Processing";
   document.f.txnSeq.value=serial();
   return(b0);
  }
 
-function onreadystatechange(http,b0,ts,t,next,c)
+function onreadystatechange(http,n,b0,ts,t,next,c)
  {http.onreadystatechange=function()
    {if(4===http.readyState)
      {if(200!==http.status)
@@ -495,17 +519,17 @@ function onreadystatechange(http,b0,ts,t,next,c)
          {next(b0,ts,c);
          }
         else
-         {document.f.b.value=b0;
-          document.f.b.disabled=false;
+         {n.value=b0;
+          n.disabled=false;
          }
        }
      }
    };
  }
 
-function http_processing(b,p,b0,ts,t,next,c)
+function http_processing(b,a,p,n,b0,ts,t,next,c)
  {var http=new XMLHttpRequest();
-  onreadystatechange(http,b0,ts,t,next,c);
+  onreadystatechange(http,n,b0,ts,t,next,c);
   var g=document.getElementById("p");
   if(null!==g)
    {http.upload.onprogress=function(e)
@@ -515,16 +539,19 @@ function http_processing(b,p,b0,ts,t,next,c)
        }
      };
    }
-  http.open("POST",window.location,true);
+  http.open("POST",a,true);
   if(""!==p)
    {http.setRequestHeader("Content-type",p);
    }
   http.send(b);
  }
 
-function post()
- {var b0=http_start();
-  http_processing(JSON.stringify(f2o()),"application/json;charset=UTF-8",b0,[0],0,undefined,undefined);
+function post(o,a,n)
+ {var b0=http_start(n);
+  a=window.location.protocol+"//"+window.location.hostname+(""===window.location.port?"":":"+window.location.port)+a;
+  o["txnSeq"]=document.f.txnSeq.value;
+  o["platformId"]=client.platformId;
+  http_processing(JSON.stringify(o),a,"application/json;charset=UTF-8",n,b0,[0],0,undefined,undefined);
   return(false);
  }
 

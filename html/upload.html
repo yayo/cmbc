@@ -42,14 +42,14 @@ function next(b0,ts,c)
       var n=check_file_size_name(f);
       form.append(n,f.files[0],n);
      }
-    http_processing(form,"",b0,ts,t,next,c);
+    http_processing(form,window.location.pathname,"",document.f.b,b0,ts,t,next,c);
    }
  }
 
 function upload()
  {if(0===Object.keys(md5s).length){alert("NOthing Selected!");return(false);}
   else
-   {var b0=http_start();
+   {var b0=http_start(document.f.b);
     document.getElementById("o").innerHTML="";
     var c=f2o();
     var ts=Object.assign({},submits);

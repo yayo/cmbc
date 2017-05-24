@@ -167,12 +167,6 @@ app.get
   }
  );
 app.get
- ("/queryMchnt.html",function(req,res)
-  {resources(res);
-   res.sendFile(__dirname+ "/html/"+"queryMchnt.html" );
-  }
- );
-app.get
  ("/chnlAdd.html",function(req,res)
   {resources(res);
    res.sendFile(__dirname+ "/html/"+"chnlAdd.html" );
@@ -182,12 +176,6 @@ app.get
  ("/chnlUpd.html",function(req,res)
   {resources(res);
    res.sendFile(__dirname+ "/html/"+"chnlUpd.html" );
-  }
- );
-app.get
- ("/queryChnl.html",function(req,res)
-  {resources(res);
-   res.sendFile(__dirname+ "/html/"+"queryChnl.html" );
   }
  );
 app.get
