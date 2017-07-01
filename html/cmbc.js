@@ -59,7 +59,7 @@ var c2n=
   "fixFeeRate":["固定比例费率",1,2,0,0,0],
   "specFeeRate":["特殊费率",1,2,0,0,0],
   "account":["结算账号",1,1,0,0,0],
-  "pbcBankId":["开户行号",1,0,0,0,0],
+  "pbcBankId":["开户行号",1,1,0,0,0],
   "acctName":["开户人",1,1,0,0,0],
   "acctType":["账户类型",1,1,0,0,0],
   "idType":["开户人证件类型",1,0,0,0,0],
@@ -436,21 +436,26 @@ function Colorful(k,v)
 
 function o2t(o)
  {o=JSON.parse(o);
-  var t=document.createElement("table");
+  let t=document.createElement("table");
   for(i in o)
-   {var r=document.createElement("tr");
-    var v;
+   {let r=document.createElement("tr");
+    let v;
     v=document.createElement("td");
     if("qrcode"===i)
      {if(o.hasOwnProperty("cmbcMchntId")&&""!==o[i])
-       {qrcodelib.toCanvas
-         (client.qrcode+"?merchantNum="+o["cmbcMchntId"]+"&platformId="+client.platformId+"&sign="+o[i],
+       {let url=client.qrcode+"?merchantNum="+o["cmbcMchntId"]+"&platformId="+client.platformId+"&sign="+o[i];
+        qrcodelib.toCanvas
+         (url,
           function(e,c)
            {if(e) alert(e);
             else
              {v.colSpan=3;
               v.align="center";
-              v.appendChild(c);
+              let a=document.createElement("a");
+              a.href=url;
+              a.target="_blank";
+              a.appendChild(c);
+              v.appendChild(a);
               r.appendChild(v);
               t.appendChild(r);
              }
@@ -460,7 +465,7 @@ function o2t(o)
      }
     else
      {o[i]=transform("from",i,o[i]);
-      var e;
+      let e;
       if(undefined!==(e=document.getElementsByName(i)[0])&&null!==e&&2!==ro(i)&&(""===e.value||o[i]===e.value))
        e.value=o[i];
       else

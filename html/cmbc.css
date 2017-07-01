@@ -7,9 +7,6 @@ table td:nth-child(1)
 table td:nth-child(3)
  {width: 40%;
  }
-textarea
- {width: 99%;
- }
 .success {color:blue;}
 .failed {color:red;}
 .mandatory {background-color:#FAAFB8}
