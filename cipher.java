@@ -97,7 +97,7 @@ public class cipher
       try
        {X509Cert p=X509CertHelper.parse(c);
         PublicKey k=p.getPublicKey();
-	o=new SignatureUtil2().p1VerifyMessage(Mechanism.SM3_SM2,i.getBytes("UTF8"),s.getBytes(),k,n);
+        o=new SignatureUtil2().p1VerifyMessage(Mechanism.SM3_SM2,i.getBytes("UTF8"),s.getBytes(),k,n);
        }
       catch(IOException e)
        {e.printStackTrace();

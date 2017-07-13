@@ -81,7 +81,7 @@ function serial()
  {var t=Math.random();
   t=(""+t).substring(2,18);
   t=t+("0".repeat(16-t.length));
-  return((new Date).getTime()+""+t);
+  return(Date.now()+""+t);
  }
 
 function out2cmbc(i)
@@ -389,7 +389,7 @@ function transform(d,k,v)
      switch(k)
       {case "dayLimit":
        case "monthLimit":
-        return(""+parseInt(v)*1000000);
+        return(Number.isNaN(v=parseInt(v))?"":""+v*1000000);
        default:
         return(v);
       }
@@ -397,7 +397,7 @@ function transform(d,k,v)
      switch(k)
       {case "dayLimit":
        case "monthLimit":
-        return(""+parseInt(v)/1000000);
+        return(Number.isNaN(v=parseInt(v))?"":""+v/1000000);
        default:
         return(v);
       }

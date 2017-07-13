@@ -1,22 +1,26 @@
-
-var config_file="./config";
-var config=require(config_file);
+'use strict';
+const config_file="./config";
+const config=require(config_file);
+const dateformat=require("dateformat");
 const http2=require("spdy");
-var express=require("express");
-var bodyParser=require("body-parser");
-var formidable=require("formidable")
-var request=require("request");
-var FormData=require("form-data");
-var java=require("java");
-var fs=require("fs");
-var md5=require("md5");
-var sqlite=require("sqlite3");
+const express=require("express");
+const bodyParser=require("body-parser");
+const formidable=require("formidable");
+const request=require("request");
+const FormData=require("form-data");
+const java=require("java");
+const fs=require("fs");
+const md5=require("md5");
+const sqlite=require("sqlite3");
+const nodemailer=require("nodemailer");
+const schedule=require("node-schedule");
 
 var app=express();
 app.disable("x-powered-by");
 var config_file_mtime=(new Date(fs.statSync(__dirname+"/"+config_file+".js")["mtime"])).toGMTString();
 var jsonParser=bodyParser.json({extended: false})
 java.classpath.push(__dirname+"/SADK-CMBC-3.1.0.8.jar");
+let smtp=nodemailer.createTransport(config.mail.smtp);
 
 var db=new sqlite.Database
  ("cmbc.db",sqlite.OPEN_READWRITE|sqlite.OPEN_CREATE,
@@ -195,7 +199,7 @@ app.get
     var t=setInterval
      (function()
        {res.write("event: ping\n");
-        res.write("data: "+(new Date()).getTime()+"\n\n");
+        res.write("data: "+Date.now()+"\n\n");
        },
       1000
      );
@@ -203,22 +207,22 @@ app.get
    }
  );
 
-function encode(res,i)
+function encode(i,r)
  {if(!i.hasOwnProperty("txnSeq")||!i.hasOwnProperty("platformId")||""===i.txnSeq||i.platformId!==config.client.platformId)
-   {res.end(JSON.stringify({"Error":"txnSeq||platformId"}));
+   {r(JSON.stringify({"Error":"txnSeq||platformId"}));
     return(undefined);
    }
   else
    {var o=JSON.stringify(i);
     var s=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,o);
     if(""===s)
-     {res.end(JSON.stringify({"Error":"SADK-CMBC::sign"}));
+     {r(JSON.stringify({"Error":"SADK-CMBC::sign"}));
       return(undefined);
      }
     else
      {o=java.callStaticMethodSync("com.yayooo.cmbc.cipher","encrypt",config.credentials.cmbc,JSON.stringify({"sign":s,"body":o}));
       if(""===o)
-       {res.end(JSON.stringify({"Error":"SADK-CMBC::encrypt"}));
+       {r(JSON.stringify({"Error":"SADK-CMBC::encrypt"}));
         return(undefined);
        }
       else
@@ -228,23 +232,27 @@ function encode(res,i)
    }
  }
 
-function decode(i,res,action,e,cmbc,body)
+function decode(i,action,e,cmbc,body,r)
  {if(e)
-   {res.end(JSON.stringify(e));
+   {r(JSON.stringify(e));
+    return(undefined);
    }
   else if(cmbc.statusCode!=200)
-   {res.end(JSON.stringify({"Error":"statusCode:"+cmbc.statusCode}));
+   {r(JSON.stringify({"Error":"statusCode:"+cmbc.statusCode}));
+    return(undefined);
    }
   else
    {console.log(body);
     body=JSON.parse(body);
     if(""===body.businessContext)
-     {res.end(JSON.stringify(body));
+     {r(JSON.stringify(body));
+      return(undefined);
      }
     else
      {e=java.callStaticMethodSync("com.yayooo.cmbc.cipher","decrypt",config.credentials.my.key.file,config.credentials.my.key.password,body.businessContext);
       if(""===e)
-       {res.end(JSON.stringify({"Error":"decrypt"}));
+       {r(JSON.stringify({"Error":"decrypt"}));
+        return(undefined);
        }
       else
        {try
@@ -252,66 +260,72 @@ function decode(i,res,action,e,cmbc,body)
           console.log(cmbc.body);
           e=java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.cmbc,cmbc.body,cmbc.sign);
           if(true!==e)
-           {res.end(JSON.stringify({"Error":"verify"}));
+           {r(JSON.stringify({"Error":"verify"}));
+            return(undefined);
            }
           else
            {cmbc=JSON.parse(cmbc.body);
-            if(!cmbc.hasOwnProperty("txnSeq")||!cmbc.hasOwnProperty("platformId")||!cmbc.hasOwnProperty("outMchntId")||cmbc.txnSeq!==i.txnSeq||cmbc.outMchntId!==i.outMchntId||cmbc.platformId!==config.client.platformId)
-             {res.end(JSON.stringify({"Error":"platformId||txnSeq||outMchntId"}));
+            if(!cmbc.hasOwnProperty("platformId")||cmbc.platformId!==config.client.platformId)
+             {r(JSON.stringify({"Error":"platformId"}));
+              return(undefined);
              }
             else
-             {if(cmbc.hasOwnProperty("respCode")&&"0000"===cmbc.respCode)
-               {if(cmbc.hasOwnProperty("cmbcMchntId")&&""!==cmbc.cmbcMchntId)
-                 {if("mchntAdd"===action)
-                   {db.exec
-                     ("INSERT INTO out2cmbc values(\""+cmbc.outMchntId+"\",\""+cmbc.cmbcMchntId+"\");",
-                      function(e)
-                       {if(null!==e)
-                         console.log(e);
-                       }
-                     );
-                   }
-                  e="&merchantNum="+cmbc.cmbcMchntId+"&platformId="+config.client.platformId;
-                  i=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,e);
-                  if(""!==i&&true===java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.my.cert,e,i))
-                   {cmbc["qrcode"]=i;
+             {if(cmbc.hasOwnProperty("txnSeq")&&cmbc.txnSeq!==i.txnSeq&&cmbc.hasOwnProperty("outMchntId")&&cmbc.outMchntId===i.outMchntId)
+               {if(cmbc.hasOwnProperty("respCode")&&"0000"===cmbc.respCode)
+                 {if(cmbc.hasOwnProperty("cmbcMchntId")&&""!==cmbc.cmbcMchntId)
+                   {if("mchntAdd"===action)
+                     {db.exec
+                       ("INSERT INTO out2cmbc values(\""+cmbc.outMchntId+"\",\""+cmbc.cmbcMchntId+"\");",
+                        function(e)
+                         {if(null!==e)
+                           console.log(e);
+                         }
+                       );
+                     }
+                    e="&merchantNum="+cmbc.cmbcMchntId+"&platformId="+config.client.platformId;
+                    i=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,e);
+                    if(""!==i&&true===java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.my.cert,e,i))
+                     {cmbc["qrcode"]=i;
+                     }
                    }
                  }
                }
-              res.end(JSON.stringify(cmbc));
+              return(JSON.stringify(cmbc));
              }
            }
          }
         catch(e)
-         {res.end(JSON.stringify({"Error":"JSON.parse","value":e}));
+         {r(JSON.stringify({"Error":"JSON.parse","value":e}));
+          return(undefined);
          }
        }
      }
    }
  }
 
-function post(req,res,action)
+function post(req,action,r)
  {console.log(req.connection.remoteAddress+":"+req.connection.remotePort+" => "+action);
   req=req.body;
   console.log(JSON.stringify(req));
-  var body=encode(res,req);
+  let body=encode(req,r);
   if(undefined!==body)
-   {var url=config.server.cmbc+action+".do";
+   {let url=config.client.api+action+".do";
     request.post
      ({"url":url,"headers":{"Content-Type":"application/json"},"body":JSON.stringify(body)},
       function(e,cmbc_res,cmbc_body)
-       {decode(req,res,action,e,cmbc_res,cmbc_body);
+       {body=decode(req,action,e,cmbc_res,cmbc_body,r);
+        if(undefined!==body){r(body);}
        }
      );
    }
  }
 
-app.post('/mchntAdd.html',jsonParser,function(req,res){post(req,res,"mchntAdd");});
-app.post('/mchntUpd.html',jsonParser,function(req,res){post(req,res,"mchntUpd");});
-app.post('/queryMchnt.html',jsonParser,function(req,res){post(req,res,"queryMchnt");});
-app.post('/chnlAdd.html',jsonParser,function(req,res){post(req,res,"chnlAdd");});
-app.post('/chnlUpd.html',jsonParser,function(req,res){post(req,res,"chnlUpd");});
-app.post('/queryChnl.html',jsonParser,function(req,res){post(req,res,"queryChnl");});
+app.post('/mchntAdd.html',jsonParser,function(req,res){post(req,"lcbpService/mchntAdd",function(r){res.end(r);});});
+app.post('/mchntUpd.html',jsonParser,function(req,res){post(req,"lcbpService/mchntUpd",function(r){res.end(r);});});
+app.post('/queryMchnt.html',jsonParser,function(req,res){post(req,"lcbpService/queryMchnt",function(r){res.end(r);});});
+app.post('/chnlAdd.html',jsonParser,function(req,res){post(req,"lcbpService/chnlAdd",function(r){res.end(r);});});
+app.post('/chnlUpd.html',jsonParser,function(req,res){post(req,"lcbpService/chnlUpd",function(r){res.end(r);});});
+app.post('/queryChnl.html',jsonParser,function(req,res){post(req,"lcbpService/queryChnl",function(r){res.end(r);});});
 
 app.post
  ('/upload.html',
@@ -354,9 +368,9 @@ app.post
                     p["upFileCount"]=""+upFileCount;
                     p["md5s"]=md5s;
                     console.log(JSON.stringify(p));
-                    var u=encode(res,p);
-                    if(undefined!==u)
-                     {var form={"uploadContext":JSON.stringify(u)};
+                    let body=encode(p,function(r){res.end(r);});
+                    if(undefined!==body)
+                     {let form={"uploadContext":JSON.stringify(body)};
                       var d={};
                       var f;
                       for(f in files)
@@ -395,11 +409,12 @@ app.post
                            }
                          }
                        }
-                      var url=config.server.cmbc+"upload"+".do";
+                      let url=config.client.api+"lcbpService/upload"+".do";
                       request.post
                        ({"url":url,"formData":form},
                         function(e,cmbc_res,cmbc_body)
-                         {decode(p,res,"upload",e,cmbc_res,cmbc_body);
+                         {body=decode(p,"upload",e,cmbc_res,cmbc_body,function(r){res.end(r);});
+                          if(undefined!==body){res.end(body);}
                          }
                        );
                      }
@@ -413,6 +428,97 @@ app.post
      );
    }
  );
+
+function sendMail(subject,body,attachments)
+ {let message={from: '"'+config.mail.from+'" <'+config.mail.smtp.auth.user+'>',to: config.mail.to};
+  Object.assign(message,{subject: subject,text: body});
+  Object.assign(message,{attachments: attachments});
+  smtp.sendMail
+   (message,(error,info)=>
+     {if(error)
+       {return(console.log(error));
+       }
+      else
+       {console.log('SMTP %s sent: %s', info.messageId, info.response);
+       }
+     }
+   );
+  }
+
+function fileDownload(slcTransDate)
+ {const segmentSize=1024;
+  const fileType={WX:{},LSY:{},ZFB:{}};
+  const r0={connection:{remoteAddress:"127.0.0.1",remotePort:0},body:{platformId:config.client.platformId,slcTransDate:slcTransDate,segmentIndex:0,segmentSize:segmentSize,reserve:""}};
+  const m0=(new Date()).toISOString()+"\r\n"+r0.body.platformId+"\r\n"+r0.body.slcTransDate+"\r\n";
+  for(let t in fileType)
+   {let req=JSON.parse(JSON.stringify(r0));
+    Object.assign(req.body,{txnSeq:Date.now(),fileType:t});
+    post
+     (req,"fileDownload",
+      function(r)
+       {r=JSON.parse(r);
+        let n;
+        if(!r.hasOwnProperty("segmentCount")||Number.isNaN(n=parseInt(r.segmentCount))||1>n||!r.hasOwnProperty("fileMd5")||1>r.fileMd5.length)
+         {sendMail(config.mail.subject+"_"+req.body.slcTransDate,m0+"ERROR: segmentCount||fileMd5 is invalid\r\nCMBC_SERVER_REQUEST: "+JSON.stringify(req.body)+"\r\nCMBC_SERVER_RESPONSE: "+JSON.stringify(r),[]);
+         }
+        else
+         {r.fileMd5="0".repeat(32-r.fileMd5.length)+r.fileMd5;
+          fileType[t].fileMd5=r.fileMd5;
+          fileType[t].b=[];
+          for(let i=1;i<=n;i++)
+           {req.body.segmentIndex=i;
+            post
+             (req,"fileDownload",
+              function(r)
+               {r=JSON.parse(r);
+                if(!r.hasOwnProperty("segmentMd5")||1>r.segmentMd5.length)
+                 {sendMail(config.mail.subject+"_"+req.body.slcTransDate,m0+"ERROR: segmentMd5 is invalid\r\nCMBC_SERVER_REQUEST: "+JSON.stringify(req.body)+"\r\nCMBC_SERVER_RESPONSE: "+JSON.stringify(r),[]);
+                 }
+                else
+                 {r.segmentMd5="0".repeat(32-r.segmentMd5.length)+r.segmentMd5;
+                  if(md5(r.segmentContent)!==r.segmentMd5)
+                   {sendMail(config.mail.subject+"_"+req.body.slcTransDate,m0+"ERROR: segmentMd5 NOT match: Calculated="+md5(r.segmentContent)+" <> "+r.segmentMd5+"=Expected\r\nCMBC_SERVER_REQUEST: "+JSON.stringify(req.body)+"\r\nCMBC_SERVER_RESPONSE: "+JSON.stringify(r),[]);
+                   }
+                  else
+                   {fileType[t].b[i-1]=Buffer.from(r.segmentContent,"base64");
+                    if(fileType[t].b.length==n)
+                     {let l,c=true;
+                      for(l=0;l<n;l++) if("undefined"===typeof(fileType[t].b[l])) c=false;
+                      if(c)
+                       {fileType[t].buffer=Buffer.concat(fileType[t].b);
+                        for(l=0;l<n;l++) delete(fileType[t].b[l]);
+                        if(md5(fileType[t].buffer)!==fileType[t].fileMd5)
+                         {sendMail(config.mail.subject+"_"+req.body.slcTransDate,m0+"ERROR: fileMd5 NOT match: Calculated="+md5(fileType[t].buffer)+" <> "+fileType[t].fileMd5+"=Expected\r\nCMBC_SERVER_REQUEST: "+JSON.stringify(req.body)+"\r\nCMBC_SERVER_RESPONSE: "+JSON.stringify(r),[]);
+                         }
+                        else
+                         {fileType[t].size=fileType[t].buffer.length;
+                          for(l in fileType) if(!fileType[l].hasOwnProperty("size")) c=false;
+                          if(c)
+                           {let a=[];
+                            let m=m0;
+                            for(l in fileType)
+                             {m+=l+" "+fileType[l].size+" "+fileType[l].fileMd5+"\r\n";
+                              a.push({filename: req.body.slcTransDate+"."+l+".txt",contentType: "application/octet-stream",content: fileType[l].buffer});
+                              delete(fileType[l]);
+                             }
+                            sendMail(config.mail.subject+"_"+req.body.slcTransDate,m,a);
+                           }
+                         }
+                       }
+                     }
+                   }
+                 }
+               }
+             );
+           }
+         }
+       }
+     );
+   }
+ }
+
+//fileDownload(dateformat(Date.now()-0*24*60*60*1000,"yyyymmdd"));
+schedule.scheduleJob(config.mail.schedule,function(){fileDownload(dateformat(Date.now()-1*24*60*60*1000,"yyyymmdd"));});
 
 http2.createServer
  ({protocols: ["h2"],

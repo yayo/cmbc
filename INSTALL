@@ -12,6 +12,9 @@ npm install java
 npm install md5
 npm install sqlite3
 npm install qrcode
+npm install nodemailer
+npm install dateformat
+npm install node-schedule
 
 javac -cp SADK-CMBC-3.1.0.8.jar -d node_modules/java/src-java cipher.java
 
