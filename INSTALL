@@ -1,4 +1,6 @@
 
+# scl enable devtoolset-3 bash
+
 jdk
 nodejs
 npm
@@ -11,6 +13,7 @@ npm install form-data
 npm install java
 npm install md5
 npm install sqlite3
+npm install sequelize    
 npm install qrcode
 npm install nodemailer
 npm install dateformat

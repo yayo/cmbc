@@ -14,8 +14,8 @@
 <tr><td></td><td><input type="text" name="platformId" maxlength=21 value=""></td><td>民生银行生成</td></tr>
 <tr><td></td><td><input type="text" name="operId" maxlength=20 value=""></td><td></td></tr>
 <tr><td rowspan=2>商户信息</td></tr>
-<tr><td></td><td><input type="text" onblur="out2cmbc(this)" name="outMchntId" maxlength=64 value=""></td><td>与商户基础信息注册时参数一致</td></tr>
-<tr><td></td><td><input type="text" name="cmbcMchntId" maxlength=21 value=""></td><td>要与商户基础信息注册时参数一致</td></tr> 
+<tr><td></td><td><input type="text" onblur="out2cmbc()" name="outMchntId" maxlength=64 value=""></td><td>与商户基础信息注册时参数一致</td></tr>
+<tr><td></td><td><input type="text" onblur="out2cmbc()" name="cmbcMchntId" maxlength=21 value=""></td><td>要与商户基础信息注册时参数一致</td></tr> 
 <tr><td></td><td><input type="text" name="cmbcSignId" maxlength=21 value=""></td><td>民生为每个账户分配一个唯一的编号</td></tr>
 <tr><td></td><td><select name="apiCode" maxlength=4><option value="0005" selected>微信</option><option value="0007">支付宝</option><option value="0008">QQ钱包</option></select></td><td>0005：微信；0007：支付宝；0008：QQ钱包</td></tr>
 <tr><td></td><td><input type="text" name="fixFeeRate" maxlength=100 value=""></td><td>0.50%：0.50小数点后精确到2位</td></tr>

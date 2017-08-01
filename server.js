@@ -12,36 +12,78 @@ const java=require("java");
 const fs=require("fs");
 const md5=require("md5");
 const sqlite=require("sqlite3");
+const Sequelize=require("sequelize");
 const nodemailer=require("nodemailer");
 const schedule=require("node-schedule");
+
+function verify_config()
+ {if(config.reconcile.keepLog>config.reconcile.checkDays)
+   config.reconcile.keepLog=config.reconcile.checkDays;
+ }
+verify_config();
+
+java.classpath.push(__dirname+"/SADK-CMBC-3.1.0.8.jar");
+let cipher=java.newInstanceSync("com.yayooo.cmbc.cipher",config.credentials.cmbc,config.credentials.my.key.file,config.credentials.my.key.password,config.credentials.my.cert);
 
 var app=express();
 app.disable("x-powered-by");
 var config_file_mtime=(new Date(fs.statSync(__dirname+"/"+config_file+".js")["mtime"])).toGMTString();
 var jsonParser=bodyParser.json({extended: false})
-java.classpath.push(__dirname+"/SADK-CMBC-3.1.0.8.jar");
-let smtp=nodemailer.createTransport(config.mail.smtp);
+let smtp=nodemailer.createTransport(config.reconcile.mail.smtp);
 
-var db=new sqlite.Database
- ("cmbc.db",sqlite.OPEN_READWRITE|sqlite.OPEN_CREATE,
-  function()
-   {db.get
-     ("SELECT name FROM sqlite_master WHERE type=\"table\" AND name=\"out2cmbc\";",
-      function(err,row)
-       {if(null===err&&undefined===row)
-         {db.exec
-           ("CREATE TABLE out2cmbc(out VARCHAR(64) PRIMARY KEY, cmbc VARCHAR(21) NOT NULL UNIQUE);",
-            function(err)
-             {if(null!==err)
-               {console.log(err);
-               }
-             }
-           );
-         }
+const db=new Sequelize({dialect:"sqlite",storage: config.server.sqlite, operatorsAliases: false});
+let out2cmbc;
+let reconcile_log;
+db.authenticate().then
+ ( () =>
+  {out2cmbc=db.define
+    ("out2cmbc",
+     {out:
+       {field: "out",
+        type: Sequelize.STRING(64),
+        primaryKey: true
+       },
+      cmbc:
+       {field: "cmbc",
+        type: Sequelize.STRING(21),
+        allowNull: false,
+        unique: true
        }
-     );
-   }
- );
+     },
+     {tableName: "out2cmbc",
+      freezeTableName: true,
+      timestamps: false
+     }
+    );
+   out2cmbc.removeAttribute('id');
+   out2cmbc.sync({force: false}).catch( (err) => {console.error("Error:",err);} );
+   reconcile_log=db.define
+    ("reconcile_log",
+     {date:
+       {field: "date",
+        type: Sequelize.DATEONLY,
+        allowNull: false
+       },
+      status:
+       {field: "status",
+        type: Sequelize.INTEGER,
+        allowNull: false
+       },
+      message:
+       {field: "message",
+        type: Sequelize.STRING,
+        allowNull: false
+       }
+     },
+     {tableName: "reconcile_log",
+      freezeTableName: true,
+      timestamps: true
+     }
+    );
+   reconcile_log.sync({force: false}).catch( (err) => {console.error("Error:",err);} );
+  }
+ ).catch( (err) => {console.error("Error:",err);} );
+
 app.get
  ("/",function(req,res)
   {res.redirect("/index.html");
@@ -69,6 +111,7 @@ app.get
  ("/spark-md5.js",function(req,res)
   {res.setHeader("Content-Encoding","gzip");
    res.setHeader("Content-Type","application/javascript; charset=UTF-8");
+   /* curl -A '' -k -O https://raw.githubusercontent.com/satazor/js-spark-md5/master/spark-md5.js */
    res.sendFile(__dirname+ "/html/"+"spark-md5.js.gz" );
   }
  );
@@ -119,7 +162,7 @@ function resources(res)
     } 
    );
   s2.on("error",function(){});
-  // fs.createReadStream(__dirname+"/html/"+"cmbc.css").pipe(s2); /* CRASHED */
+  // fs.createReadStream(__dirname+"/html/"+"cmbc.js").pipe(s2); /* CRASHED */
   s2.end(fs.readFileSync(__dirname+"/html/"+"cmbc.js")); /* OK */
  }
 app.get
@@ -128,28 +171,11 @@ app.get
     {res.end("");
     }
    else
-    {db.get
-      ("SELECT cmbc FROM out2cmbc WHERE out=\""+req.query["out"]+"\";",
-       function(e,r)
-        {if(null!==e)
-          {console.log(e);
-           res.end("");
-          }
-         else
-          {if(undefined===r)
-            {res.end("");
-            }
-           else
-            {if(!r.hasOwnProperty("cmbc"))
-              {res.end("");
-              }
-             else
-              {res.end(r["cmbc"]);
-              }
-            }
-          }
-        }
-      );
+    {out2cmbc.findOne
+      ({where: {out: req.query["out"]},
+        attributes: ["cmbc"]
+       }
+      ).then( (r) => {res.end(null===r?"":r.dataValues["cmbc"]);} );
     }
   }
  );
@@ -214,13 +240,13 @@ function encode(i,r)
    }
   else
    {var o=JSON.stringify(i);
-    var s=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,o);
+    let s=java.callMethodSync(cipher,"sign",o);
     if(""===s)
      {r(JSON.stringify({"Error":"SADK-CMBC::sign"}));
       return(undefined);
      }
     else
-     {o=java.callStaticMethodSync("com.yayooo.cmbc.cipher","encrypt",config.credentials.cmbc,JSON.stringify({"sign":s,"body":o}));
+     {o=java.callMethodSync(cipher,"encrypt",JSON.stringify({"sign":s,"body":o}));
       if(""===o)
        {r(JSON.stringify({"Error":"SADK-CMBC::encrypt"}));
         return(undefined);
@@ -249,7 +275,7 @@ function decode(i,action,e,cmbc,body,r)
       return(undefined);
      }
     else
-     {e=java.callStaticMethodSync("com.yayooo.cmbc.cipher","decrypt",config.credentials.my.key.file,config.credentials.my.key.password,body.businessContext);
+     {e=java.callMethodSync(cipher,"decrypt",body.businessContext);
       if(""===e)
        {r(JSON.stringify({"Error":"decrypt"}));
         return(undefined);
@@ -258,7 +284,7 @@ function decode(i,action,e,cmbc,body,r)
        {try
          {var cmbc=JSON.parse(e);
           console.log(cmbc.body);
-          e=java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.cmbc,cmbc.body,cmbc.sign);
+          e=java.callMethodSync(cipher,"verify",false,cmbc.body,cmbc.sign);
           if(true!==e)
            {r(JSON.stringify({"Error":"verify"}));
             return(undefined);
@@ -270,21 +296,15 @@ function decode(i,action,e,cmbc,body,r)
               return(undefined);
              }
             else
-             {if(cmbc.hasOwnProperty("txnSeq")&&cmbc.txnSeq!==i.txnSeq&&cmbc.hasOwnProperty("outMchntId")&&cmbc.outMchntId===i.outMchntId)
+             {if(cmbc.hasOwnProperty("txnSeq")&&cmbc.txnSeq===i.txnSeq&&cmbc.hasOwnProperty("outMchntId")&&cmbc.outMchntId===i.outMchntId)
                {if(cmbc.hasOwnProperty("respCode")&&"0000"===cmbc.respCode)
                  {if(cmbc.hasOwnProperty("cmbcMchntId")&&""!==cmbc.cmbcMchntId)
-                   {if("mchntAdd"===action)
-                     {db.exec
-                       ("INSERT INTO out2cmbc values(\""+cmbc.outMchntId+"\",\""+cmbc.cmbcMchntId+"\");",
-                        function(e)
-                         {if(null!==e)
-                           console.log(e);
-                         }
-                       );
+                   {if("lcbpService/mchntAdd"===action)
+                     {out2cmbc.create({out: cmbc.outMchntId,cmbc: cmbc.cmbcMchntId}).catch( (err) => {console.error("Error:",err);} );
                      }
                     e="&merchantNum="+cmbc.cmbcMchntId+"&platformId="+config.client.platformId;
-                    i=java.callStaticMethodSync("com.yayooo.cmbc.cipher","sign",config.credentials.my.key.file,config.credentials.my.key.password,e);
-                    if(""!==i&&true===java.callStaticMethodSync("com.yayooo.cmbc.cipher","verify",config.credentials.my.cert,e,i))
+                    i=java.callMethodSync(cipher,"sign",e);
+                    if(""!==i&&true===java.callMethodSync(cipher,"verify",true,e,i))
                      {cmbc["qrcode"]=i;
                      }
                    }
@@ -429,17 +449,20 @@ app.post
    }
  );
 
-function sendMail(subject,body,attachments)
- {let message={from: '"'+config.mail.from+'" <'+config.mail.smtp.auth.user+'>',to: config.mail.to};
+function sendMail(subject,body,attachments,slcTransDate)
+ {let message={from: '"'+config.reconcile.mail.from+'" <'+config.reconcile.mail.smtp.auth.user+'>',to: config.reconcile.mail.to};
   Object.assign(message,{subject: subject,text: body});
   Object.assign(message,{attachments: attachments});
   smtp.sendMail
-   (message,(error,info)=>
-     {if(error)
-       {return(console.log(error));
+   (message,(e,info)=>
+     {if(e)
+       {reconcile_log.create({date: slcTransDate,status: (e.hasOwnProperty("responseCode")&&Number.isInteger(e.responseCode)?e.responseCode:500),message: JSON.stringify(e)});
        }
       else
-       {console.log('SMTP %s sent: %s', info.messageId, info.response);
+       {const s=("250 Ok: queued as "===info.response?250:200);
+        reconcile_log.create({date: slcTransDate,status: s,message: info.messageId});
+        if(250===s)
+         reconcile_log.destroy({where: {date: {[Sequelize.Op.lt]: dateformat(Date.now()+config.reconcile.keepLog*24*60*60*1000,"yyyy-mm-dd")}}});
        }
      }
    );
@@ -447,69 +470,71 @@ function sendMail(subject,body,attachments)
 
 function fileDownload(slcTransDate)
  {const segmentSize=1024;
-  const fileType={WX:{},LSY:{},ZFB:{}};
+  const fileTypes=config.reconcile.types.reduce((o,v)=>(o[v]={},o),{});
   const r0={connection:{remoteAddress:"127.0.0.1",remotePort:0},body:{platformId:config.client.platformId,slcTransDate:slcTransDate,segmentIndex:0,segmentSize:segmentSize,reserve:""}};
   const m0=(new Date()).toISOString()+"\r\n"+r0.body.platformId+"\r\n"+r0.body.slcTransDate+"\r\n";
-  for(let t in fileType)
+  for(let t in fileTypes)
    {let req=JSON.parse(JSON.stringify(r0));
     Object.assign(req.body,{txnSeq:Date.now(),fileType:t});
     post
      (req,"fileDownload",
       function(r)
        {r=JSON.parse(r);
-        let n;
-        if(!r.hasOwnProperty("segmentCount")||Number.isNaN(n=parseInt(r.segmentCount))||1>n||!r.hasOwnProperty("fileMd5")||1>r.fileMd5.length)
-         {sendMail(config.mail.subject+"_"+req.body.slcTransDate,m0+"ERROR: segmentCount||fileMd5 is invalid\r\nCMBC_SERVER_REQUEST: "+JSON.stringify(req.body)+"\r\nCMBC_SERVER_RESPONSE: "+JSON.stringify(r),[]);
+        if(!r.hasOwnProperty("slcTransDate")||r.slcTransDate!==req.body.slcTransDate)
+         {reconcile_log.create({date: req.body.slcTransDate,status: (r.hasOwnProperty("gateReturnMessage")&&"文件尚未生成:从FTP上下载文件发生错误"===r.gateReturnMessage?591:592),message: JSON.stringify({error:"Invalid slcTransDate",request: req.body,response: r})});
          }
         else
-         {r.fileMd5="0".repeat(32-r.fileMd5.length)+r.fileMd5;
-          fileType[t].fileMd5=r.fileMd5;
-          fileType[t].b=[];
-          for(let i=1;i<=n;i++)
-           {req.body.segmentIndex=i;
-            post
-             (req,"fileDownload",
-              function(r)
-               {r=JSON.parse(r);
-                if(!r.hasOwnProperty("segmentMd5")||1>r.segmentMd5.length)
-                 {sendMail(config.mail.subject+"_"+req.body.slcTransDate,m0+"ERROR: segmentMd5 is invalid\r\nCMBC_SERVER_REQUEST: "+JSON.stringify(req.body)+"\r\nCMBC_SERVER_RESPONSE: "+JSON.stringify(r),[]);
-                 }
-                else
-                 {r.segmentMd5="0".repeat(32-r.segmentMd5.length)+r.segmentMd5;
-                  if(md5(r.segmentContent)!==r.segmentMd5)
-                   {sendMail(config.mail.subject+"_"+req.body.slcTransDate,m0+"ERROR: segmentMd5 NOT match: Calculated="+md5(r.segmentContent)+" <> "+r.segmentMd5+"=Expected\r\nCMBC_SERVER_REQUEST: "+JSON.stringify(req.body)+"\r\nCMBC_SERVER_RESPONSE: "+JSON.stringify(r),[]);
+         {if(!r.hasOwnProperty("segmentCount")||Number.isInteger(r.segmentCount)||1>r.segmentCount||!r.hasOwnProperty("fileMd5")||32!==r.fileMd5.length)
+           {reconcile_log.create({date: req.body.slcTransDate,status: 593,message: JSON.stringify({error:"segmentCount||fileMd5 is invalid",request: req.body,response: r})});
+           }
+          else
+           {fileTypes[t].fileMd5=r.fileMd5;
+            fileTypes[t].b=[];
+            for(let i=1;i<=r.segmentCount;i++)
+             {req.body.segmentIndex=i;
+              post
+               (req,"fileDownload",
+                function(r)
+                 {r=JSON.parse(r);
+                  if(!r.hasOwnProperty("segmentMd5")||32!==r.segmentMd5.length)
+                   {reconcile_log.create({date: req.body.slcTransDate,status: 594,message: JSON.stringify({error:"Invalid segmentMd5",request: req.body,response: r})});
                    }
                   else
-                   {fileType[t].b[i-1]=Buffer.from(r.segmentContent,"base64");
-                    if(fileType[t].b.length==n)
-                     {let l,c=true;
-                      for(l=0;l<n;l++) if("undefined"===typeof(fileType[t].b[l])) c=false;
-                      if(c)
-                       {fileType[t].buffer=Buffer.concat(fileType[t].b);
-                        for(l=0;l<n;l++) delete(fileType[t].b[l]);
-                        if(md5(fileType[t].buffer)!==fileType[t].fileMd5)
-                         {sendMail(config.mail.subject+"_"+req.body.slcTransDate,m0+"ERROR: fileMd5 NOT match: Calculated="+md5(fileType[t].buffer)+" <> "+fileType[t].fileMd5+"=Expected\r\nCMBC_SERVER_REQUEST: "+JSON.stringify(req.body)+"\r\nCMBC_SERVER_RESPONSE: "+JSON.stringify(r),[]);
-                         }
-                        else
-                         {fileType[t].size=fileType[t].buffer.length;
-                          for(l in fileType) if(!fileType[l].hasOwnProperty("size")) c=false;
-                          if(c)
-                           {let a=[];
-                            let m=m0;
-                            for(l in fileType)
-                             {m+=l+" "+fileType[l].size+" "+fileType[l].fileMd5+"\r\n";
-                              a.push({filename: req.body.slcTransDate+"."+l+".txt",contentType: "application/octet-stream",content: fileType[l].buffer});
-                              delete(fileType[l]);
+                   {if(md5(r.segmentContent)!==r.segmentMd5)
+                     {reconcile_log.create({date: req.body.slcTransDate,status: 595,message: JSON.stringify({error:"segmentMd5 NOT match: Calculated="+md5(r.segmentContent),request: req.body,response: r})});
+                     }
+                    else
+                     {fileTypes[t].b[i-1]=Buffer.from(r.segmentContent,"base64");
+                      if(fileTypes[t].b.length==r.segmentCount)
+                       {let l,c=true;
+                        for(l=0;l<r.segmentCount;l++) if("undefined"===typeof(fileTypes[t].b[l])) c=false;
+                        if(c)
+                         {fileTypes[t].buffer=Buffer.concat(fileTypes[t].b);
+                          for(l=0;l<r.segmentCount;l++) delete(fileTypes[t].b[l]);
+                          if(md5(fileTypes[t].buffer)!==fileTypes[t].fileMd5)
+                           {reconcile_log.create({date: req.body.slcTransDate,status: 596,message: JSON.stringify({error:"fileMd5 NOT match: Calculated="+md5(fileTypes[t].buffer),request: req.body,response: r})});
+                           }
+                          else
+                           {fileTypes[t].size=fileTypes[t].buffer.length;
+                            for(l in fileTypes) if(!fileTypes[l].hasOwnProperty("size")) c=false;
+                            if(c)
+                             {let a=[];
+                              let m=m0;
+                              for(l in fileTypes)
+                               {m+=l+" "+fileTypes[l].size+" "+fileTypes[l].fileMd5+"\r\n";
+                                a.push({filename: req.body.slcTransDate+"."+l+".txt",contentType: "application/octet-stream",content: fileTypes[l].buffer});
+                                delete(fileTypes[l]);
+                               }
+                              sendMail(config.reconcile.mail.subject+"_"+req.body.slcTransDate,m,a,req.body.slcTransDate);
                              }
-                            sendMail(config.mail.subject+"_"+req.body.slcTransDate,m,a);
                            }
                          }
                        }
                      }
                    }
                  }
-               }
-             );
+               );
+             }
            }
          }
        }
@@ -517,17 +542,35 @@ function fileDownload(slcTransDate)
    }
  }
 
-//fileDownload(dateformat(Date.now()-0*24*60*60*1000,"yyyymmdd"));
-schedule.scheduleJob(config.mail.schedule,function(){fileDownload(dateformat(Date.now()-1*24*60*60*1000,"yyyymmdd"));});
+if(Number.isInteger(config.reconcile.schedule))
+ fileDownload(dateformat(Date.now()+config.reconcile.schedule*24*60*60*1000,"yyyymmdd"));
+else
+ schedule.scheduleJob
+  (config.reconcile.schedule,
+   () =>
+   {for(let i=config.reconcile.checkDays;i<=-1;i++)
+     {let date=dateformat(Date.now()+i*24*60*60*1000,"yyyy-mm-dd");
+      reconcile_log.findOne
+       ({where: {date: date,status: 250},
+         attributes: ["date"]
+        }
+       ).then
+       ( (r) =>
+        {if(null===r) fileDownload(date.replace(/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/,"$1$2$3"));
+        }
+       );
+     }
+   }
+  );
 
 http2.createServer
  ({protocols: ["h2"],
    plain: false,
-   key: fs.readFileSync(config.server.listen.key),
-   cert: fs.readFileSync(config.server.listen.cert),
+   key: fs.readFileSync(config.server.listen.tls.key),
+   cert: fs.readFileSync(config.server.listen.tls.cert),
    requestCert: true,
    rejectUnauthorized: true,
-   ca: [fs.readFileSync(config.server.listen.ca)],
+   ca: [fs.readFileSync(config.server.listen.tls.verify.ca)],
   },
   app
  ).listen(config.server.listen.port,config.server.listen.bind);

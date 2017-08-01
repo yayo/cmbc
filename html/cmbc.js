@@ -84,11 +84,12 @@ function serial()
   return(Date.now()+""+t);
  }
 
-function out2cmbc(i)
- {if(""!==i.value)
-   {var o=document.getElementsByName("cmbcMchntId")[0];
+function out2cmbc()
+ {let i=document.getElementsByName("outMchntId")[0];
+  if(""!==i.value)
+   {let o=document.getElementsByName("cmbcMchntId")[0];
     if(undefined!==o&&null!==o)
-     {var v;
+     {let v;
       if(null!==(v=localStorage.getItem("out2cmbc_"+i.value))&&""!==v)
        o.value=v;
       else if(""===o.value)
